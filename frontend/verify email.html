@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Veridict — Verify your email</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="main.css"/>
+<link rel="manifest" href="/manifest.json"/>
+<style>.verify-body{background:var(--v-bg);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}.verify-card{width:100%;max-width:420px;padding:44px 40px;border-radius:var(--v-r-xl);background:rgba(13,13,24,.7);backdrop-filter:blur(20px);border:1px solid var(--v-border-md);box-shadow:var(--v-shadow);text-align:center}.verify-spinner{width:24px;height:24px;border:2.5px solid rgba(124,58,237,.25);border-top-color:var(--v-purple);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 20px}@keyframes spin{to{transform:rotate(360deg)}}</style>
+</head><body class="verify-body">
+<div style="position:fixed;top:20px;left:24px"><a href="/login" class="v-back"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M11 18l-6-6 6-6"/></svg>Back to login</a></div>
+<div class="verify-card" id="verifyCard">
+  <div class="verify-spinner" id="verifySpinner"></div>
+  <h2 style="font-family:var(--v-font-d);font-size:1.3rem;font-weight:600;margin-bottom:8px" id="verifyTitle">Verifying your email…</h2>
+  <p style="font-size:.86rem;color:var(--v-muted)" id="verifySub">Please wait a moment.</p>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  const card=document.getElementById('verifyCard'), spinner=document.getElementById('verifySpinner');
+  const token=new URLSearchParams(window.location.search).get('token');
+  async function loadCsrf(){try{const r=await fetch('/api/csrf-token',{credentials:'same-origin'});return(await r.json()).csrf_token||'';}catch(e){return'';}}
+  if (!token) { spinner.remove(); card.innerHTML='<h2 style="font-family:var(--v-font-d);font-size:1.3rem;font-weight:600;margin-bottom:8px">Invalid link</h2><p style="font-size:.86rem;color:var(--v-muted);margin-bottom:20px">This verification link is broken. Check your email for the original link.</p><a href="/login" class="btn btn--secondary">Back to login</a>'; return; }
+  const csrf=await loadCsrf();
+  try {
+    const res=await fetch('/api/verify-email',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json','X-CSRFToken':csrf},body:JSON.stringify({token})});
+    const d=await res.json(); spinner.remove();
+    if (res.ok) { card.innerHTML='<h2 style="font-family:var(--v-font-d);font-size:1.3rem;font-weight:600;margin-bottom:8px">✅ Email verified!</h2><p style="font-size:.86rem;color:var(--v-muted)">Your account is fully activated. Welcome aboard.</p>'; setTimeout(()=>{window.location.href=d.redirect||'/dashboard';},1400); }
+    else { card.innerHTML=`<h2 style="font-family:var(--v-font-d);font-size:1.3rem;font-weight:600;margin-bottom:8px">⚠️ Link expired</h2><p style="font-size:.86rem;color:var(--v-muted);margin-bottom:20px">${d.message}</p><a href="/dashboard" class="btn btn--secondary">Go to dashboard</a>`; }
+  } catch(e) { spinner.remove(); card.innerHTML='<h2 style="font-family:var(--v-font-d);font-size:1.3rem;font-weight:600">Connection error</h2><p style="font-size:.86rem;color:var(--v-muted)">Try the link again.</p>'; }
+});
+</script>
+</body></html>

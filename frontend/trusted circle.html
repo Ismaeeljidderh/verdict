@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Veridict — Trusted Circle</title>
+<meta name="description" content="Protect your family from scams. Add loved ones to your Trusted Circle and get alerted when they encounter a threat."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="main.css"/><link rel="stylesheet" href="pages.css"/>
+<link rel="manifest" href="/manifest.json"/>
+<style>
+.tc-hero{display:flex;align-items:center;gap:16px;padding:24px 26px;border-radius:var(--v-r-lg);background:linear-gradient(135deg,rgba(201,147,46,.12),rgba(59,130,246,.06));border:1px solid rgba(201,147,46,.28);margin-bottom:24px}
+.tc-hero__icon{width:52px;height:52px;border-radius:14px;background:rgba(201,147,46,.16);border:1px solid rgba(201,147,46,.3);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.tc-hero h1{font-family:var(--v-font-d);font-size:1.2rem;font-weight:600;margin-bottom:4px}
+.tc-hero p{font-size:.84rem;color:var(--v-muted)}
+.tc-add-row{display:flex;gap:10px;margin-bottom:8px}
+.tc-add-row input{flex:1;padding:12px 14px;border-radius:var(--v-r-sm);background:var(--v-input);border:1px solid var(--v-border-md);color:var(--v-text);font-size:.88rem;outline:none}
+.tc-add-row input:focus{border-color:var(--v-purple)}
+.tc-slots{font-size:.78rem;color:var(--v-faint);margin-bottom:16px}
+.tc-member{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:var(--v-r-md);background:var(--v-card);border:1px solid var(--v-border);margin-bottom:10px}
+.tc-member__avatar{width:38px;height:38px;border-radius:50%;background:var(--v-grad);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.85rem;flex-shrink:0}
+.tc-member__name{font-size:.88rem;font-weight:500}
+.tc-member__email{font-size:.76rem;color:var(--v-faint)}
+.tc-member__status{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 8px;border-radius:999px;margin-left:auto;margin-right:10px}
+.tc-status--active{background:rgba(60,166,116,.14);color:var(--v-safe)}
+.tc-status--pending{background:rgba(201,147,46,.14);color:var(--v-purple-lt)}
+.tc-remove-btn{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--v-faint);flex-shrink:0}
+.tc-remove-btn:hover{background:rgba(214,69,69,.12);color:var(--v-danger)}
+.tc-activity-item{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:var(--v-r-sm);background:var(--v-card);border:1px solid var(--v-border);margin-bottom:8px}
+.tc-activity-item__badge{font-size:.66rem;font-weight:700;text-transform:capitalize;padding:2px 8px;border-radius:999px;flex-shrink:0}
+.tc-empty{text-align:center;padding:32px;color:var(--v-faint);font-size:.84rem}
+.tc-lock-overlay{text-align:center;padding:48px 24px}
+</style>
+</head><body class="p-body">
+<header class="v-topbar">
+  <a href="/dashboard" class="v-topbar__back"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M11 18l-6-6 6-6"/></svg>Dashboard</a>
+  <nav class="v-topbar__nav"><a href="/dashboard" class="v-topbar__link">Dashboard</a><a href="/trusted-circle" class="v-topbar__link is-active">Trusted Circle</a></nav>
+  <div class="v-topbar__right"><div class="v-topbar__user"><span class="v-topbar__avatar" id="topbarAvatar">V</span><span class="v-topbar__name" id="topbarName">Loading…</span></div></div>
+</header>
+
+<main class="p-main">
+  <div class="tc-hero">
+    <div class="tc-hero__icon"><svg width="26" height="26" viewBox="0 0 20 20" fill="none" stroke="var(--v-purple-lt)" stroke-width="1.6"><circle cx="7" cy="6" r="3"/><circle cx="14" cy="8" r="2.3"/><path d="M2 17c0-2.8 2.2-5 5-5s5 2.2 5 5M12 12.5c2.5.2 4.5 2.2 4.7 4.5"/></svg></div>
+    <div>
+      <h1>Trusted Circle <span style="font-size:.6rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:2px 8px;border-radius:999px;background:var(--v-grad);color:#fff;margin-left:6px">PRO</span></h1>
+      <p>Protect the people who matter most. Add up to 4 family members and get notified when any of them encounter a scam.</p>
+    </div>
+  </div>
+
+  <div id="lockedState" hidden>
+    <div class="p-card tc-lock-overlay">
+      <svg width="40" height="40" viewBox="0 0 20 20" fill="none" stroke="var(--v-faint)" stroke-width="1.4" style="margin:0 auto 14px"><rect x="4" y="9" width="12" height="8" rx="1.5"/><path d="M6.5 9V6a3.5 3.5 0 017 0v3"/></svg>
+      <h2 style="font-family:var(--v-font-d);font-size:1.1rem;margin-bottom:8px">Trusted Circle is a Premium feature</h2>
+      <p style="font-size:.86rem;color:var(--v-muted);margin-bottom:20px">Upgrade to protect your whole family — not just yourself.</p>
+      <a href="/plan" class="btn btn--primary">Upgrade to Premium →</a>
+    </div>
+  </div>
+
+  <div id="unlockedState" hidden>
+    <div class="p-card">
+      <h2>Add someone to your circle</h2>
+      <p style="margin-bottom:14px" id="slotsText">Loading…</p>
+      <div class="tc-add-row">
+        <input type="email" id="addEmailInput" placeholder="familymember@email.com"/>
+        <button class="btn btn--primary" id="addMemberBtn"><span class="btn__label">Add</span><span class="btn__spinner"></span></button>
+      </div>
+      <p class="form-status" id="addStatus"></p>
+    </div>
+
+    <div class="p-card">
+      <h2>Your circle</h2>
+      <div id="membersList"><div class="tc-empty">Loading…</div></div>
+    </div>
+
+    <div class="p-card">
+      <h2>Recent family activity</h2>
+      <p style="margin-bottom:14px">Scans from your circle that were flagged as risky.</p>
+      <div id="activityList"><div class="tc-empty">Loading…</div></div>
+    </div>
+  </div>
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  let csrfToken = '';
+  try { const r = await fetch('/api/csrf-token', {credentials:'same-origin'}); csrfToken = (await r.json()).csrf_token || ''; } catch(e) {}
+
+  try {
+    const meRes = await fetch('/api/me', {credentials:'same-origin'});
+    if (meRes.status === 401) { window.location.href = '/login'; return; }
+    const me = await meRes.json();
+    document.getElementById('topbarAvatar').textContent = (me.full_name||me.username||'V').charAt(0).toUpperCase();
+    document.getElementById('topbarName').textContent = me.full_name || me.username;
+
+    if (!me.is_premium) {
+      document.getElementById('lockedState').hidden = false;
+      return;
+    }
+    document.getElementById('unlockedState').hidden = false;
+    await loadCircle();
+    await loadActivity();
+  } catch(e) { console.error(e); }
+
+  async function loadCircle() {
+    try {
+      const r = await fetch('/api/trusted-circle', {credentials:'same-origin'});
+      const d = await r.json();
+      document.getElementById('slotsText').textContent = `${d.slots_remaining} of ${d.max_size} spots remaining.`;
+      renderMembers(d.members || []);
+    } catch(e) {}
+  }
+
+  function renderMembers(members) {
+    const list = document.getElementById('membersList');
+    if (!members.length) { list.innerHTML = '<div class="tc-empty">No one in your circle yet. Add a family member above.</div>'; return; }
+    list.innerHTML = '';
+    members.forEach(m => {
+      const initial = (m.name || m.email).charAt(0).toUpperCase();
+      const div = document.createElement('div');
+      div.className = 'tc-member';
+      div.innerHTML = `
+        <div class="tc-member__avatar">${initial}</div>
+        <div><div class="tc-member__name">${esc(m.name || m.email)}</div><div class="tc-member__email">${esc(m.email)}</div></div>
+        <span class="tc-member__status tc-status--${m.status}">${m.status}</span>
+        <button class="tc-remove-btn" data-id="${m.id}" title="Remove"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 5l10 10M15 5L5 15"/></svg></button>`;
+      div.querySelector('.tc-remove-btn').addEventListener('click', async () => {
+        try {
+          await fetch(`/api/trusted-circle/${m.id}`, {method:'DELETE', credentials:'same-origin', headers:{'X-CSRFToken':csrfToken}});
+          loadCircle();
+        } catch(e) {}
+      });
+      list.appendChild(div);
+    });
+  }
+
+  async function loadActivity() {
+    try {
+      const r = await fetch('/api/trusted-circle/activity', {credentials:'same-origin'});
+      const d = await r.json();
+      const list = document.getElementById('activityList');
+      const activity = d.activity || [];
+      if (!activity.length) { list.innerHTML = '<div class="tc-empty">No risky scans from your circle yet — that\\'s good news.</div>'; return; }
+      list.innerHTML = '';
+      activity.forEach(a => {
+        const div = document.createElement('div');
+        div.className = 'tc-activity-item';
+        const color = a.verdict === 'scam' ? 'rgba(214,69,69,.14)' : 'rgba(201,147,46,.14)';
+        const textColor = a.verdict === 'scam' ? 'var(--v-danger)' : 'var(--v-purple-lt)';
+        div.innerHTML = `<span class="tc-activity-item__badge" style="background:${color};color:${textColor}">${a.verdict}</span>
+          <div style="flex:1"><div style="font-size:.84rem;font-weight:500">${esc(a.member_name)}</div><div style="font-size:.78rem;color:var(--v-muted)">${esc(a.preview)}</div></div>`;
+        list.appendChild(div);
+      });
+    } catch(e) {}
+  }
+
+  document.getElementById('addMemberBtn').addEventListener('click', async () => {
+    const input = document.getElementById('addEmailInput');
+    const status = document.getElementById('addStatus');
+    const btn = document.getElementById('addMemberBtn');
+    const email = input.value.trim();
+    if (!email) { status.textContent = 'Enter an email address.'; status.className = 'form-status is-error'; return; }
+    btn.classList.add('is-loading'); btn.disabled = true;
+    try {
+      const r = await fetch('/api/trusted-circle/add', {
+        method: 'POST', credentials: 'same-origin',
+        headers: {'Content-Type':'application/json','X-CSRFToken':csrfToken},
+        body: JSON.stringify({email})
+      });
+      const d = await r.json();
+      if (r.ok) {
+        status.textContent = d.message; status.className = 'form-status is-success';
+        input.value = ''; loadCircle();
+      } else {
+        status.textContent = d.message || 'Could not add member.'; status.className = 'form-status is-error';
+      }
+    } catch(e) { status.textContent = 'Connection error.'; status.className = 'form-status is-error'; }
+    finally { btn.classList.remove('is-loading'); btn.disabled = false; }
+  });
+
+  function esc(s) { const d = document.createElement('div'); d.textContent = String(s||''); return d.innerHTML; }
+});
+</script>
+</body></html>

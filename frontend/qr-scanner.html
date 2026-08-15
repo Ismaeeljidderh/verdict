@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Veridict — QR Code Scanner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="main.css"/><link rel="stylesheet" href="pages.css"/>
+<link rel="manifest" href="/manifest.json"/>
+<style>
+.qr-drop{border:2px dashed var(--v-border-md);border-radius:var(--v-r-md);padding:44px 24px;text-align:center;cursor:pointer;position:relative;transition:all .18s}
+.qr-drop:hover,.qr-drop.is-drag{border-color:var(--v-purple);background:rgba(124,58,237,.05)}
+.qr-drop input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.qr-decoded{margin-top:14px;padding:14px;border-radius:var(--v-r-sm);background:var(--v-input);border:1px solid var(--v-border-md);font-size:.84rem;color:var(--v-muted);word-break:break-all;display:none}
+.qr-result{margin-top:16px;display:none}
+.qr-badge{font-family:var(--v-font-d);font-weight:700;text-transform:uppercase;padding:5px 14px;border-radius:999px;font-size:.78rem;display:inline-block;margin-bottom:10px}
+.qr-badge--safe{background:rgba(34,197,94,.16);color:var(--v-safe)}
+.qr-badge--scam{background:rgba(239,68,68,.14);color:var(--v-danger)}
+.qr-badge--suspicious{background:rgba(245,158,11,.14);color:var(--v-warn)}
+</style>
+</head><body class="p-body">
+<header class="v-topbar">
+  <a href="/scanner" class="v-topbar__back"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M11 18l-6-6 6-6"/></svg>Scanner</a>
+  <nav class="v-topbar__nav"><a href="/dashboard" class="v-topbar__link">Dashboard</a><a href="/scanner" class="v-topbar__link">Scanner</a><a href="/qr-scanner" class="v-topbar__link is-active">QR Scanner</a></nav>
+  <div class="v-topbar__right" id="qrTopbarUser"></div>
+</header>
+<main class="p-main">
+  <div class="p-header"><h1>📷 QR Code Scanner</h1><p>Upload a QR code image. Veridict decodes it and checks where it leads — before you scan it with your real device.</p></div>
+  <div class="p-card" style="background:rgba(124,58,237,.08);border-color:rgba(124,58,237,.2)"><h2>Why scan QR codes first?</h2><p>Scammers increasingly use fake QR codes on posters, receipts, and fake payment terminals. Always verify before scanning with your phone camera.</p></div>
+  <div class="p-card">
+    <div class="qr-drop" id="qrDrop">
+      <div style="font-size:2.4rem;margin-bottom:10px">🔲</div>
+      <p style="font-size:.9rem;font-weight:600;margin-bottom:6px">Drop a QR code image here</p>
+      <p style="font-size:.8rem;color:var(--v-faint)">or click to browse · JPG, PNG, WebP</p>
+      <input type="file" id="qrFile" accept="image/jpeg,image/png,image/webp,image/gif"/>
+    </div>
+    <div class="qr-decoded" id="qrDecodedWrap"><strong>Decoded content:</strong><br/><span id="qrDecodedText"></span></div>
+    <canvas id="qrCanvas" style="display:none"></canvas>
+    <p id="qrError" style="color:var(--v-danger);font-size:.82rem;margin-top:10px;display:none"></p>
+    <div style="display:flex;gap:12px;margin-top:16px">
+      <button class="btn btn--primary" id="qrScanBtn" disabled style="flex:1"><span class="btn__label">🛡️ Check this QR code</span><span class="btn__spinner"></span></button>
+      <button class="btn btn--secondary" id="qrResetBtn" style="display:none">Reset</button>
+    </div>
+    <div class="qr-result" id="qrResult">
+      <span class="qr-badge" id="qrBadge">Safe</span>
+      <p style="font-size:.86rem;margin-bottom:10px" id="qrScore"></p>
+      <div id="qrFlags"></div>
+    </div>
+  </div>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  let csrfToken='', decodedContent=null;
+  try {
+    const cr=await fetch('/api/csrf-token',{credentials:'same-origin'}); csrfToken=(await cr.json()).csrf_token||'';
+    const mr=await fetch('/api/me',{credentials:'same-origin'}); if(mr.status===401){window.location.href='/login';return;}
+    const me=await mr.json(); const i=(me.full_name||me.username||'V').charAt(0).toUpperCase(); const n=me.full_name||me.username;
+    document.getElementById('qrTopbarUser').innerHTML=`<span class="v-topbar__avatar">${i}</span><span class="v-topbar__name" style="margin-left:8px">${n}</span>`;
+  } catch(e){}
+
+  const qrDrop=document.getElementById('qrDrop'), qrFile=document.getElementById('qrFile'), qrCanvas=document.getElementById('qrCanvas'), qrDecWrap=document.getElementById('qrDecodedWrap'), qrDecText=document.getElementById('qrDecodedText'), qrScanBtn=document.getElementById('qrScanBtn'), qrResetBtn=document.getElementById('qrResetBtn'), qrError=document.getElementById('qrError'), qrResult=document.getElementById('qrResult');
+
+  ['dragover','dragenter'].forEach(ev => qrDrop.addEventListener(ev, e => { e.preventDefault(); qrDrop.classList.add('is-drag'); }));
+  ['dragleave','drop'].forEach(ev => qrDrop.addEventListener(ev, e => { e.preventDefault(); qrDrop.classList.remove('is-drag'); if(e.type==='drop'&&e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]); }));
+  qrFile.addEventListener('change', () => { if(qrFile.files[0]) processFile(qrFile.files[0]); });
+
+  function processFile(file) {
+    if (file.size > 5*1024*1024) { showError('File too large — max 5MB.'); return; }
+    const reader=new FileReader();
+    reader.onload = e => {
+      const img=new Image();
+      img.onload = () => {
+        const ctx=qrCanvas.getContext('2d'); qrCanvas.width=img.width; qrCanvas.height=img.height; ctx.drawImage(img,0,0);
+        const imgData=ctx.getImageData(0,0,img.width,img.height); const decoded=jsQR(imgData.data,imgData.width,imgData.height);
+        if (decoded) { setDecoded(decoded.data); } else { showError('No QR code found. Make sure it is clear and fully visible.'); }
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+  function setDecoded(content) { decodedContent=content; qrDecText.textContent=content; qrDecWrap.style.display='block'; qrScanBtn.disabled=false; qrResetBtn.style.display='inline-flex'; qrError.style.display='none'; qrResult.classList.remove('show'); }
+  function showError(msg) { qrError.textContent=msg; qrError.style.display='block'; }
+  qrResetBtn.addEventListener('click', () => { decodedContent=null; qrFile.value=''; qrDecWrap.style.display='none'; qrScanBtn.disabled=true; qrResetBtn.style.display='none'; qrResult.classList.remove('show'); qrError.style.display='none'; });
+
+  qrScanBtn.addEventListener('click', async () => {
+    if (!decodedContent) return;
+    qrScanBtn.classList.add('is-loading'); qrScanBtn.disabled=true;
+    try {
+      const res=await fetch('/api/scan/qr',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json','X-CSRFToken':csrfToken},body:JSON.stringify({content:decodedContent})});
+      const d=await res.json();
+      if (!res.ok) { if(d.upgrade_required){window.location.href='/plan';return;} showError(d.message||'Could not analyze.'); return; }
+      document.getElementById('qrBadge').textContent=d.verdict; document.getElementById('qrBadge').className='qr-badge qr-badge--'+d.verdict;
+      document.getElementById('qrScore').textContent=`Risk score: ${d.score}/100`;
+      document.getElementById('qrFlags').innerHTML=(d.flags||[]).map(f=>`<p style="font-size:.82rem;color:var(--v-muted);margin-bottom:6px">⚠ ${f}</p>`).join('');
+      qrResult.classList.add('show');
+    } catch(e) { showError('Connection error.'); }
+    finally { qrScanBtn.classList.remove('is-loading'); qrScanBtn.disabled=false; }
+  });
+});
+</script>
+</body></html>

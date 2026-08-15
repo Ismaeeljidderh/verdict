@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Veridict — Know before you click.</title>
+<meta name="description" content="AI-powered scam detection. Scan messages, links, emails, phone numbers and QR codes instantly. Free — no card required."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="main.css"/>
+<link rel="stylesheet" href="landing.css"/>
+<link rel="manifest" href="/manifest.json"/>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%236d28d9'/%3E%3Cstop offset='1' stop-color='%238b5cf6'/%3E%3C/linearGradient%3E%3Cpath d='M14 2L25 7.5V15.5C25 20.5 20 24.5 14 26C8 24.5 3 20.5 3 15.5V7.5L14 2Z' fill='url(%23g)'/%3E%3Cpath d='M9 14L12.5 17.5L19 11' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"/>
+<script src="sw-register.js"></script>
+</head>
+<body>
+<nav class="landing-nav">
+  <a href="/" class="landing-nav__logo">
+    <div class="landing-nav__logo-icon"><svg width="20" height="20" viewBox="0 0 28 28" fill="none"><path d="M14 2L25 7.5V15.5C25 20.5 20 24.5 14 26C8 24.5 3 20.5 3 15.5V7.5L14 2Z" fill="rgba(255,255,255,.15)" stroke="rgba(255,255,255,.5)" stroke-width="1.5"/><path d="M9 14L1２.５ １７.５L１９ １１" stroke="white" stroke-width="２.５" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <span class="landing-nav__logo-name">VERI<span>DICT</span></span>
+  </a>
+  <div class="landing-nav__links">
+    <a href="#features" class="landing-nav__link">Features</a>
+    <a href="#demo" class="landing-nav__link">Try it</a>
+    <a href="#pricing" class="landing-nav__link">Pricing</a>
+    <a href="/about" class="landing-nav__link">About</a>
+    <a href="/contact" class="landing-nav__link">Contact</a>
+  </div>
+  <div class="landing-nav__actions">
+    <a href="/login" class="btn btn--outline btn--sm">Log in</a>
+    <a href="/register" class="btn btn--primary btn--sm">Get started free</a>
+  </div>
+</nav>
+
+<section class="landing-hero">
+  <div class="landing-hero__glow-1"></div><div class="landing-hero__glow-2"></div>
+  <div class="landing-hero__eyebrow"><span class="landing-hero__eyebrow-dot"></span>AI-Powered Scam Detection &amp; Protection</div>
+  <h1 class="landing-hero__title">Know Before<br/>You Click.<br/><span class="line-grad">Stay Protected.</span></h1>
+  <p class="landing-hero__sub">Veridict uses advanced AI to detect scams, phishing attempts, and online threats in seconds — before they reach your wallet.</p>
+  <div class="landing-hero__btns">
+    <a href="/register" class="landing-hero__cta">Start scanning free<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+    <a href="#demo" class="landing-hero__secondary"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8" fill="currentColor"/></svg>Try the demo</a>
+  </div>
+  <div class="landing-hero__trust"><span>Free — no card required</span><span class="landing-hero__trust-dot"></span><span>5 free scans every week</span><span class="landing-hero__trust-dot"></span><span>Works in seconds</span></div>
+
+  <div class="landing-preview" style="width:100%;max-width:860px;margin:52px auto 0">
+    <div class="landing-preview__bar">
+      <div class="landing-preview__dot" style="background:#ef4444"></div><div class="landing-preview__dot" style="background:#f59e0b"></div><div class="landing-preview__dot" style="background:#22c55e"></div>
+      <span style="margin-left:8px;font-size:.7rem;color:var(--v-faint)">veridict.app/dashboard</span>
+    </div>
+    <div class="landing-preview__content">
+      <div class="landing-preview__sidebar">
+        <div class="landing-preview__sidebar-logo"></div>
+        <div class="landing-preview__sidebar-item" style="width:90%;height:32px;border-radius:8px;background:var(--v-grad);opacity:.7"></div>
+        <div style="margin-top:12px"></div>
+        <div class="landing-preview__sidebar-item" style="width:80%"></div>
+        <div class="landing-preview__sidebar-item" style="width:70%"></div>
+        <div class="landing-preview__sidebar-item" style="width:85%"></div>
+        <div class="landing-preview__sidebar-item" style="width:65%"></div>
+      </div>
+      <div class="landing-preview__body">
+        <div class="landing-preview__card" style="grid-column:span 3;height:40px;border-radius:10px;background:linear-gradient(135deg,rgba(169,120,33,.15),transparent);border-color:rgba(169,120,33,.25)"></div>
+        <div class="landing-preview__card"></div><div class="landing-preview__card"></div><div class="landing-preview__card"></div>
+        <div class="landing-preview__card" style="grid-column:span 2;height:80px"></div>
+        <div class="landing-preview__card" style="height:80px"></div>
+      </div>
+    </div>
+    <div class="landing-preview__glow"></div>
+  </div>
+</section>
+
+<div class="landing-stats">
+  <div style="text-align:center"><div class="landing-stat__num">10K+</div><div class="landing-stat__label">Scams blocked daily</div></div>
+  <div style="text-align:center"><div class="landing-stat__num">30+</div><div class="landing-stat__label">Scam signals detected</div></div>
+  <div style="text-align:center"><div class="landing-stat__num">&lt;3s</div><div class="landing-stat__label">Average scan time</div></div>
+  <div style="text-align:center"><div class="landing-stat__num">60+</div><div class="landing-stat__label">Verified businesses</div></div>
+</div>
+
+<section class="landing-section" id="features">
+  <div class="landing-section__label">What Veridict does</div>
+  <h2 class="landing-section__title">Everything you need to stay safe online</h2>
+  <p class="landing-section__sub">Comprehensive protection across every channel scammers use to reach you.</p>
+  <div class="landing-features">
+    <div class="landing-feature"><div class="landing-feature__icon" style="background:rgba(224,172,74,.18);border:1px solid rgba(224,172,74,.3)"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 5a2 2 0 012-2h12a2 2 0 012 2v7a2 2 0 01-2 2H9l-4 3v-3H4a2 2 0 01-2-2V5z"/></svg></div><div class="landing-feature__title">Message Scanner</div><div class="landing-feature__desc">Paste any WhatsApp, SMS, or text message. AI analyses it for 30+ scam patterns and returns a verdict in seconds.</div></div>
+    <div class="landing-feature"><div class="landing-feature__icon" style="background:rgba(20,184,166,.15);border:1px solid rgba(20,184,166,.3)"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="10" r="8"/><path d="M2 10h16M10 2a12 12 0 010 16"/></svg></div><div class="landing-feature__title">Website Scanner</div><div class="landing-feature__desc">Check any URL before you click. Detects phishing sites, fake domains, typosquatting, and redirects to dangerous pages.</div></div>
+    <div class="landing-feature"><div class="landing-feature__icon" style="background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.25)"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="4" width="16" height="12" rx="1"/><path d="M2 5l8 6 8-6"/></svg></div><div class="landing-feature__title">Email Scanner</div><div class="landing-feature__desc">Paste suspicious email content — subject, sender, and body. Detects phishing, impersonation, and social engineering.</div></div>
+    <div class="landing-feature"><div class="landing-feature__icon" style="background:rgba(249,115,22,.15);border:1px solid rgba(249,115,22,.3)"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 5a1 1 0 011-1h2.5l1 3-1.5 1.5a11 11 0 005.5 5.5L13 12.5l3 1V16a1 1 0 01-1 1A13 13 0 013 5z"/></svg></div><div class="landing-feature__title">Phone Checker</div><div class="landing-feature__desc">Check phone numbers for known scam reports, robocall patterns, and government impersonation.</div></div>
+    <div class="landing-feature"><div class="landing-feature__icon" style="background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.25)"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="2" width="6" height="6" rx="1"/><rect x="12" y="2" width="6" height="6" rx="1"/><rect x="2" y="12" width="6" height="6" rx="1"/><circle cx="15" cy="15" r="2"/></svg></div><div class="landing-feature__title">QR Code Scanner</div><div class="landing-feature__desc">Upload or scan a QR code to see exactly where it leads before you visit. Stops fake payment QR scams cold.</div></div>
+    <div class="landing-feature"><div class="landing-feature__icon" style="background:rgba(79,143,255,.15);border:1px solid rgba(79,143,255,.3)"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="7" width="16" height="11" rx="1"/><path d="M6 7V5a4 4 0 018 0v2"/></svg></div><div class="landing-feature__title">Business Checker</div><div class="landing-feature__desc">Verify if a company is real or fake. Covers 60+ Nigerian banks, government agencies, telecoms, and international brands.</div></div>
+  </div>
+</section>
+
+<section style="padding:0 24px 90px" id="demo">
+  <div style="max-width:1100px;margin:0 auto">
+    <div class="landing-section__label">Try it free</div>
+    <h2 class="landing-section__title">See it in action — right now</h2>
+    <p class="landing-section__sub">No account needed for the demo. Paste any suspicious text and get a verdict.</p>
+    <div class="landing-demo">
+      <div class="landing-demo__header">
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="#e0ac4a" stroke-width="1.8"><path d="M10 2a6 6 0 00-6 6v3l-2 2v1h16v-1l-2-2V8a6 6 0 00-6-6z"/><path d="M8 15a2 2 0 004 0"/></svg>
+        <span class="landing-demo__title">Live Demo Scanner</span>
+        <span class="landing-demo__badge">Powered by AI</span>
+      </div>
+      <div class="landing-demo__body">
+        <textarea class="landing-demo__textarea" id="demoInput" placeholder="Paste a suspicious message, link, or email here… e.g. 'Congratulations! You won $5,000. Click here to claim now!'" maxlength="1000"></textarea>
+        <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
+          <button class="btn btn--primary" id="demoScanBtn" style="flex:1;min-width:160px"><span class="btn__label"> Scan this</span><span class="btn__spinner"></span></button>
+          <button class="btn btn--secondary btn--sm" data-demo="Congratulations! You have been selected to receive $5,000 cash prize. Click here to claim immediately: http://bit.ly/claim-prize-now. Offer expires in 1 hour!">Try scam example</button>
+          <button class="btn btn--secondary btn--sm" data-demo="Hey, are we still meeting at 3pm tomorrow? Let me know if the time works for you.">Try safe example</button>
+        </div>
+        <div class="landing-demo__result" id="demoResult">
+          <div class="landing-demo__verdict" id="demoVerdict"></div>
+          <div class="landing-demo__score" id="demoScore"></div>
+          <div class="landing-demo__flags" id="demoFlags"></div>
+          <div class="landing-demo__signup-cta">Want full scan history, QR scanner, business checker &amp; more? <a href="/register">Create free account →</a></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="landing-section" id="pricing">
+  <div class="landing-section__label">Simple pricing</div>
+  <h2 class="landing-section__title">Start free. Upgrade when you're ready.</h2>
+  <p class="landing-section__sub">No hidden fees. Cancel Premium anytime.</p>
+  <div class="landing-pricing">
+    <div class="landing-plan">
+      <span class="landing-plan__badge">Free</span>
+      <div class="landing-plan__name">Free Plan</div>
+      <div class="landing-plan__price">$0<span>/month</span></div>
+      <ul class="landing-plan__features"><li>5 scans every week</li><li>All 5 scanner types</li><li>QR code scanner</li><li>Business checker</li><li>Full scan history</li><li>Watch ads for bonus scans</li></ul>
+      <a href="/register" class="btn btn--outline btn--full">Get started free</a>
+    </div>
+    <div class="landing-plan landing-plan--featured">
+      <span class="landing-plan__badge">Premium</span>
+      <div class="landing-plan__name">Premium Plan</div>
+      <div class="landing-plan__price">$10<span>/month</span></div>
+      <ul class="landing-plan__features"><li>Unlimited scans</li><li>All 5 scanner types</li><li>QR code scanner</li><li>Business checker + URL analyzer</li><li>Priority AI detection</li><li>No ads, ever</li><li>Cancel anytime</li></ul>
+      <a href="/register" class="btn btn--primary btn--full">Get Premium</a>
+    </div>
+  </div>
+</section>
+
+<section class="landing-cta-section">
+  <h2>Ready to stop scams before they reach you?</h2>
+  <p>Join thousands of Nigerians staying safe with Veridict every day.</p>
+  <a href="/register" class="landing-hero__cta" style="display:inline-flex">Create your free account<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+</section>
+
+<footer class="landing-footer">
+  <div class="landing-footer__copy">© 2025 Jyram Labs · Built by Jay'stech · Know before you click.</div>
+  <div class="landing-footer__links"><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+</footer>
+
+<script src="landing.js"></script>
+</body>
+</html>

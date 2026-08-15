@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Veridict — Business Checker</title>
+<meta name="description" content="Verify if a company is real or fake. Detect impersonation of Nigerian banks, telecoms, government agencies and international brands."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css"/><link rel="stylesheet" href="nav.css"/>
+<link rel="manifest" href="/manifest.json"/>
+<style>
+.bc-body{background:var(--color-bg);min-height:100vh}
+.bc-main{max-width:780px;margin:0 auto;padding:48px 32px 80px}
+.bc-hero{text-align:center;margin-bottom:40px}
+.bc-hero h1{font-family:var(--font-display);font-size:clamp(1.8rem,3vw,2.4rem);font-weight:600;letter-spacing:-0.02em;margin:0 0 12px}
+.bc-hero p{color:var(--color-text-muted);font-size:0.92rem;max-width:520px;margin:0 auto}
+.bc-card{padding:32px;border-radius:18px;background:rgba(13,15,26,0.7);backdrop-filter:blur(20px);border:1px solid var(--color-border-strong);box-shadow:0 24px 60px rgba(0,0,0,0.4);margin-bottom:24px;position:relative;overflow:hidden}
+.bc-card::before{content:"";position:absolute;top:-120px;right:-80px;width:300px;height:300px;background:radial-gradient(circle,rgba(124,92,252,0.18) 0%,transparent 68%);filter:blur(20px);pointer-events:none}
+.bc-input-row{display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.bc-input{flex:1;min-width:220px;padding:14px 16px;border-radius:10px;background:var(--color-surface-raised);border:1px solid var(--color-border);color:var(--color-text);font-family:var(--font-body);font-size:0.92rem;outline:none;transition:border-color 0.18s,box-shadow 0.18s}
+.bc-input:focus{border-color:var(--color-purple);box-shadow:0 0 0 3px rgba(124,92,252,0.16)}
+.bc-input::placeholder{color:var(--color-text-faint)}
+.bc-examples{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.bc-example-lbl{font-size:0.74rem;color:var(--color-text-faint)}
+.bc-ex-btn{padding:4px 12px;border-radius:999px;border:1px solid var(--color-border-strong);background:transparent;color:var(--color-text-muted);font-family:var(--font-body);font-size:0.74rem;cursor:pointer;transition:all 0.18s}
+.bc-ex-btn:hover{border-color:var(--color-purple);color:var(--color-text);background:rgba(124,92,252,0.1)}
+.bc-result{margin-top:20px;border-radius:14px;overflow:hidden;animation:cardIn 0.3s cubic-bezier(0.16,1,0.3,1)}
+@keyframes cardIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.bc-result__header{padding:20px 22px;display:flex;align-items:center;gap:14px}
+.bc-result__badge{font-family:var(--font-display);font-size:0.82rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;padding:6px 16px;border-radius:999px}
+.bc-result__badge.verdict--verified{background:rgba(52,211,153,0.16);color:var(--color-safe);border:1px solid rgba(52,211,153,0.32);box-shadow:0 0 20px rgba(52,211,153,0.15)}
+.bc-result__badge.verdict--suspicious{background:rgba(251,191,36,0.14);color:#fbbf24;border:1px solid rgba(251,191,36,0.3)}
+.bc-result__badge.verdict--impersonation{background:rgba(255,92,114,0.14);color:var(--color-danger);border:1px solid rgba(255,92,114,0.3);box-shadow:0 0 20px rgba(255,92,114,0.15)}
+.bc-result__badge.verdict--unknown{background:rgba(255,255,255,0.07);color:var(--color-text-muted);border:1px solid var(--color-border-strong)}
+.bc-result__message{flex:1;font-size:0.9rem;line-height:1.5}
+.bc-result__body{padding:0 22px 22px;display:flex;flex-direction:column;gap:12px}
+.bc-result__tips{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
+.bc-result__tips li{font-size:0.82rem;color:var(--color-text-muted);padding-left:20px;position:relative;line-height:1.55}
+.bc-result__tips li::before{content:"⚠";position:absolute;left:0;color:#fbbf24;font-size:0.75rem}
+.bc-coverage{padding:24px;border-radius:14px;background:var(--color-surface);border:1px solid var(--color-border)}
+.bc-coverage h2{font-family:var(--font-display);font-size:0.95rem;font-weight:600;margin:0 0 16px}
+.bc-coverage-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.bc-coverage-group h3{font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--color-purple);margin:0 0 8px}
+.bc-coverage-group ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:4px}
+.bc-coverage-group li{font-size:0.76rem;color:var(--color-text-muted)}
+.bc-result__header--verified{background:rgba(52,211,153,0.06);border-bottom:1px solid rgba(52,211,153,0.15)}
+.bc-result__header--impersonation{background:rgba(255,92,114,0.06);border-bottom:1px solid rgba(255,92,114,0.15)}
+.bc-result__header--suspicious{background:rgba(251,191,36,0.06);border-bottom:1px solid rgba(251,191,36,0.15)}
+.bc-result__header--unknown{background:rgba(255,255,255,0.02);border-bottom:1px solid var(--color-border)}
+@media(max-width:640px){.bc-coverage-grid{grid-template-columns:1fr 1fr}.bc-input-row{flex-direction:column}.bc-main{padding:32px 16px 60px}}
+</style>
+</head>
+<body class="bc-body">
+<header class="v-topbar">
+  <div class="v-topbar__left">
+    <a href="/scanner" class="v-topbar__back"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M11 18l-6-6 6-6"/></svg>Scanner</a>
+  </div>
+  <nav class="v-topbar__nav">
+    <a href="/dashboard" class="v-topbar__link">Dashboard</a>
+    <a href="/scanner" class="v-topbar__link">Scanner</a>
+    <a href="/business-checker" class="v-topbar__link is-active">Business Checker</a>
+  </nav>
+  <div class="v-topbar__right"><a href="/dashboard" class="btn btn--secondary" style="text-decoration:none;font-size:0.8rem;padding:7px 14px">← Dashboard</a></div>
+</header>
+<main class="bc-main">
+  <div class="bc-hero">
+    <h1>🏢 Verified Business Checker</h1>
+    <p>Enter a company name, domain, or URL to instantly check if it's a real verified business or a scam/impersonation.</p>
+  </div>
+  <div class="bc-card">
+    <div class="bc-input-row">
+      <input class="bc-input" id="bcInput" type="text" placeholder="Enter company name, domain, or URL… e.g. gtbank.com or 'GTBank'" autocomplete="off"/>
+      <button class="btn btn--primary" id="bcCheckBtn" style="min-width:130px">
+        <span class="btn__label">Check</span><span class="btn__spinner" aria-hidden="true"></span>
+      </button>
+    </div>
+    <div class="bc-examples">
+      <span class="bc-example-lbl">Try:</span>
+      <button class="bc-ex-btn" data-val="gtbank-verify.com">Fake GTBank site</button>
+      <button class="bc-ex-btn" data-val="gtbank.com">Real GTBank</button>
+      <button class="bc-ex-btn" data-val="dhl-delivery-ng.com">Fake DHL</button>
+      <button class="bc-ex-btn" data-val="efcc-nigeria-prize.tk">Fake EFCC</button>
+      <button class="bc-ex-btn" data-val="paystack.com">Real Paystack</button>
+    </div>
+    <div class="bc-result" id="bcResult" hidden></div>
+  </div>
+  <div class="bc-coverage">
+    <h2>What we verify</h2>
+    <div class="bc-coverage-grid">
+      <div class="bc-coverage-group"><h3>🇳🇬 Nigerian Banks</h3><ul><li>GTBank / GTCO</li><li>Access Bank</li><li>UBA</li><li>Zenith Bank</li><li>First Bank</li><li>Kuda, Opay, Palmpay</li><li>+ 6 more</li></ul></div>
+      <div class="bc-coverage-group"><h3>🏛 Government</h3><ul><li>CBN</li><li>EFCC</li><li>NAFDAC</li><li>FIRS</li><li>NIMC (NIN)</li><li>INEC</li><li>NCC</li></ul></div>
+      <div class="bc-coverage-group"><h3>📦 Delivery / Tech</h3><ul><li>DHL, FedEx, UPS</li><li>NIPOST</li><li>Google, Apple</li><li>Microsoft, Meta</li><li>Amazon, Netflix</li><li>PayPal, Binance</li></ul></div>
+    </div>
+  </div>
+</main>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const input   = document.getElementById('bcInput');
+  const btn     = document.getElementById('bcCheckBtn');
+  const result  = document.getElementById('bcResult');
+
+  document.querySelectorAll('.bc-ex-btn').forEach(b => {
+    b.addEventListener('click', () => { input.value = b.dataset.val; doCheck(); });
+  });
+
+  btn.addEventListener('click', doCheck);
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') doCheck(); });
+
+  async function doCheck() {
+    const q = input.value.trim();
+    if (!q) { input.focus(); return; }
+    btn.classList.add('is-loading'); btn.disabled = true;
+    result.hidden = true;
+
+    try {
+      const res = await fetch('/api/business/check', {
+        method:'POST', credentials:'same-origin',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({query: q})
+      });
+      const d = await res.json();
+      renderResult(d);
+    } catch(e) {
+      result.innerHTML = '<div style="padding:16px;font-size:0.84rem;color:var(--color-danger)">Connection error. Please try again.</div>';
+      result.hidden = false;
+    } finally {
+      btn.classList.remove('is-loading'); btn.disabled = false;
+    }
+  }
+
+  const VERDICT_LABELS = { verified:'✅ Verified', suspicious:'⚠️ Suspicious', impersonation:'🚨 Impersonation Detected', unknown:'❓ Unknown' };
+
+  function renderResult(d) {
+    const tips = d.tips?.length
+      ? `<ul class="bc-result__tips">${d.tips.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>` : '';
+    const company = d.company ? `<p style="font-size:0.78rem;color:var(--color-text-faint);margin:0">Company: <strong style="color:var(--color-text)">${esc(d.company)}</strong></p>` : '';
+    result.innerHTML = `
+      <div class="bc-result__header bc-result__header--${d.verdict}">
+        <span class="bc-result__badge verdict--${d.verdict}">${VERDICT_LABELS[d.verdict]||d.verdict}</span>
+        <span class="bc-result__message">${esc(d.message||'')}</span>
+      </div>
+      <div class="bc-result__body">
+        ${company}
+        ${tips}
+      </div>`;
+    result.hidden = false;
+  }
+
+  function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+});
+</script>
+</body>
+</html>

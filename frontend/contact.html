@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Veridict — Contact Us</title>
+<meta name="description" content="Get in touch with Jyram Labs."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="main.css"/><link rel="stylesheet" href="pages.css"/>
+<link rel="manifest" href="/manifest.json"/>
+<style>
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.contact-item{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+.contact-item__icon{width:42px;height:42px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.1rem;background:rgba(169,120,33,.16);border:1px solid rgba(169,120,33,.3)}
+.contact-item__label{font-size:.7rem;color:var(--v-faint);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px}
+.contact-item__value{font-size:.92rem;font-weight:500}
+.contact-item__value a{color:var(--v-text);transition:color var(--v-t)}
+.contact-item__value a:hover{color:var(--v-purple-lt);text-decoration:underline}
+.contact-form input,.contact-form textarea,.contact-form select{width:100%;padding:12px 14px;border-radius:var(--v-r-sm);background:var(--v-input);border:1px solid var(--v-border-md);color:var(--v-text);font-family:var(--v-font-b);font-size:.88rem;outline:none;margin-bottom:12px}
+.contact-form input:focus,.contact-form textarea:focus,.contact-form select:focus{border-color:var(--v-purple);box-shadow:0 0 0 3px rgba(201,147,46,.16)}
+.contact-form textarea{min-height:110px;resize:vertical}
+.contact-form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:640px){.contact-grid,.contact-form-row{grid-template-columns:1fr}}
+</style>
+</head><body class="p-body">
+<header class="v-topbar">
+  <a href="/" class="v-topbar__back"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M11 18l-6-6 6-6"/></svg>Home</a>
+  <nav class="v-topbar__nav"><a href="/" class="v-topbar__link">Home</a><a href="/about" class="v-topbar__link">About</a><a href="/contact" class="v-topbar__link is-active">Contact</a></nav>
+  <div class="v-topbar__right"><a href="/login" class="btn btn--outline btn--sm">Log in</a><a href="/register" class="btn btn--primary btn--sm">Get started</a></div>
+</header>
+<main class="p-main">
+  <div class="p-header"><h1>Get in Touch</h1><p>Have a question, found a bug, or want to report a scam pattern? We're here.</p></div>
+  <div class="contact-grid">
+    <div class="p-card">
+      <h2>Contact Information</h2>
+      <p style="margin-bottom:16px">Jyram Labs · Jay'stech</p>
+      <div class="contact-item"><div class="contact-item__icon">📧</div><div><div class="contact-item__label">Email</div><div class="contact-item__value"><a href="mailto:ismaeeljidderh@gmail.com">ismaeeljidderh@gmail.com</a></div></div></div>
+      <div class="contact-item"><div class="contact-item__icon">📞</div><div><div class="contact-item__label">Phone / WhatsApp</div><div class="contact-item__value"><a href="tel:+2348130830306">08130830306</a></div></div></div>
+      <div class="contact-item"><div class="contact-item__icon">📱</div><div><div class="contact-item__label">Alternative</div><div class="contact-item__value"><a href="tel:+2349129386127">09129386127</a></div></div></div>
+      <p style="font-size:.78rem;padding:12px 14px;border-radius:8px;background:rgba(169,120,33,.08);border:1px solid rgba(169,120,33,.2)">🇳🇬 Based in Nigeria. We typically respond within 24 hours.</p>
+    </div>
+    <div class="p-card">
+      <h2>Send us a message</h2>
+      <div class="contact-form">
+        <div class="contact-form-row"><input type="text" placeholder="Your name" id="cName"/><input type="email" placeholder="Your email" id="cEmail"/></div>
+        <select id="cSubject"><option value="">Select subject…</option><option value="bug">Report a bug</option><option value="scam">Report a scam pattern</option><option value="feedback">Product feedback</option><option value="billing">Billing question</option><option value="other">Other</option></select>
+        <textarea placeholder="Describe your message…" id="cMessage"></textarea>
+        <button class="btn btn--primary btn--full" id="cSendBtn"><span class="btn__label">Send message</span><span class="btn__spinner"></span></button>
+        <p class="form-status" id="cStatus" style="margin-top:10px"></p>
+      </div>
+    </div>
+  </div>
+</main>
+<script>
+document.getElementById('cSendBtn').addEventListener('click', async () => {
+  const name=document.getElementById('cName').value.trim(), email=document.getElementById('cEmail').value.trim(), subject=document.getElementById('cSubject').value, msg=document.getElementById('cMessage').value.trim();
+  const status=document.getElementById('cStatus');
+  if(!name||!email||!msg){status.textContent='Please fill in all fields.';status.className='form-status is-error';return;}
+  const btn=document.getElementById('cSendBtn'); btn.classList.add('is-loading'); btn.disabled=true;
+  status.textContent=''; status.className='form-status';
+
+  try {
+    const res = await fetch('https://formspree.io/f/xgojybva', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ name, email, subject: subject || 'General inquiry', message: msg })
+    });
+
+    if (res.ok) {
+      status.textContent = "Thanks! Your message has been sent. We'll respond within 24 hours.";
+      status.className = 'form-status is-success';
+      document.getElementById('cName').value = '';
+      document.getElementById('cEmail').value = '';
+      document.getElementById('cMessage').value = '';
+      document.getElementById('cSubject').value = '';
+    } else {
+      const data = await res.json().catch(() => ({}));
+      status.textContent = data.errors?.[0]?.message || 'Could not send your message. Please try again or email us directly.';
+      status.className = 'form-status is-error';
+    }
+  } catch (e) {
+    status.textContent = 'Connection error. Please try again or email ismaeeljidderh@gmail.com directly.';
+    status.className = 'form-status is-error';
+  } finally {
+    btn.classList.remove('is-loading');
+    btn.disabled = false;
+  }
+});
+</script>
+</body></html>

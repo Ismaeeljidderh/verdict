@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Veridict — URL Analyzer</title>
+<meta name="description" content="Analyze any link before you click it. See where it really leads, detect phishing, typosquatting and shortened URLs."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css"/><link rel="stylesheet" href="nav.css"/>
+<link rel="manifest" href="/manifest.json"/>
+<style>
+.ua-body{background:var(--color-bg);min-height:100vh}
+.ua-main{max-width:800px;margin:0 auto;padding:48px 32px 80px}
+.ua-hero{text-align:center;margin-bottom:36px}
+.ua-hero h1{font-family:var(--font-display);font-size:clamp(1.8rem,3vw,2.4rem);font-weight:600;letter-spacing:-0.02em;margin:0 0 12px}
+.ua-hero p{color:var(--color-text-muted);font-size:0.92rem;max-width:520px;margin:0 auto}
+.ua-card{padding:30px;border-radius:18px;background:rgba(13,15,26,0.7);backdrop-filter:blur(20px);border:1px solid var(--color-border-strong);box-shadow:0 24px 60px rgba(0,0,0,0.4);margin-bottom:24px;position:relative;overflow:hidden}
+.ua-card::before{content:"";position:absolute;top:-100px;right:-60px;width:280px;height:280px;background:radial-gradient(circle,rgba(79,143,255,0.18) 0%,transparent 68%);filter:blur(20px);pointer-events:none}
+.ua-input-row{display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.ua-input{flex:1;min-width:220px;padding:14px 16px;border-radius:10px;background:var(--color-surface-raised);border:1px solid var(--color-border);color:var(--color-text);font-family:var(--font-body);font-size:0.92rem;outline:none;transition:border-color 0.18s,box-shadow 0.18s}
+.ua-input:focus{border-color:var(--color-blue);box-shadow:0 0 0 3px rgba(79,143,255,0.16)}
+.ua-input::placeholder{color:var(--color-text-faint)}
+.ua-result{margin-top:20px;border-radius:14px;overflow:hidden;animation:cardIn 0.3s cubic-bezier(0.16,1,0.3,1)}
+@keyframes cardIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.ua-result__header{padding:20px 22px;display:flex;align-items:center;gap:16px}
+.ua-result__badge{font-family:var(--font-display);font-size:0.82rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;padding:6px 16px;border-radius:999px;white-space:nowrap}
+.ua-result__badge.verdict--safe{background:rgba(52,211,153,0.16);color:var(--color-safe);border:1px solid rgba(52,211,153,0.32)}
+.ua-result__badge.verdict--suspicious{background:rgba(251,191,36,0.14);color:#fbbf24;border:1px solid rgba(251,191,36,0.3)}
+.ua-result__badge.verdict--scam{background:rgba(255,92,114,0.14);color:var(--color-danger);border:1px solid rgba(255,92,114,0.3)}
+.ua-result__meta{flex:1}
+.ua-result__score{font-family:var(--font-display);font-size:0.9rem;font-weight:600;margin:0 0 3px}
+.ua-result__host{font-size:0.78rem;color:var(--color-text-faint);word-break:break-all}
+.ua-details{display:grid;grid-template-columns:repeat(2,1fr);gap:0}
+.ua-details-col{padding:18px 22px;border-top:1px solid var(--color-border)}
+.ua-details-col:nth-child(odd){border-right:1px solid var(--color-border)}
+.ua-details-col h3{font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--color-text-faint);margin:0 0 10px}
+.ua-detail-row{display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:6px}
+.ua-detail-row span:first-child{color:var(--color-text-muted)}
+.ua-detail-row span:last-child{font-weight:500;max-width:160px;word-break:break-all;text-align:right}
+.ua-flags{padding:18px 22px;border-top:1px solid var(--color-border)}
+.ua-flags h3{font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--color-text-faint);margin:0 0 12px}
+.ua-flag-item{display:flex;align-items:flex-start;gap:8px;font-size:0.82rem;color:var(--color-text-muted);margin-bottom:8px;line-height:1.5}
+.ua-flag-item::before{content:"⚠";color:#fbbf24;font-size:0.75rem;flex-shrink:0;margin-top:1px}
+.ua-warning-box{margin:16px 22px;padding:14px 16px;border-radius:10px;background:rgba(255,92,114,0.08);border:1px solid rgba(255,92,114,0.25);font-size:0.82rem;color:var(--color-danger);line-height:1.6}
+.ua-safe-box{margin:16px 22px;padding:14px 16px;border-radius:10px;background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.25);font-size:0.82rem;color:var(--color-safe);line-height:1.6}
+.ua-examples{display:flex;gap:8px;flex-wrap:wrap}
+.ua-example-lbl{font-size:0.74rem;color:var(--color-text-faint)}
+.ua-ex-btn{padding:4px 12px;border-radius:999px;border:1px solid var(--color-border-strong);background:transparent;color:var(--color-text-muted);font-family:var(--font-body);font-size:0.74rem;cursor:pointer;transition:all 0.18s}
+.ua-ex-btn:hover{border-color:var(--color-blue);color:var(--color-text);background:rgba(79,143,255,0.1)}
+@media(max-width:640px){.ua-details{grid-template-columns:1fr}.ua-details-col:nth-child(odd){border-right:none}.ua-main{padding:32px 16px 60px}.ua-input-row{flex-direction:column}}
+</style>
+</head>
+<body class="ua-body">
+<header class="v-topbar">
+  <div class="v-topbar__left">
+    <a href="/scanner" class="v-topbar__back"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M11 18l-6-6 6-6"/></svg>Scanner</a>
+  </div>
+  <nav class="v-topbar__nav">
+    <a href="/dashboard" class="v-topbar__link">Dashboard</a>
+    <a href="/scanner" class="v-topbar__link">Scanner</a>
+    <a href="/url-analyzer" class="v-topbar__link is-active">URL Analyzer</a>
+  </nav>
+  <div class="v-topbar__right"><a href="/dashboard" class="btn btn--secondary" style="text-decoration:none;font-size:0.8rem;padding:7px 14px">← Dashboard</a></div>
+</header>
+<main class="ua-main">
+  <div class="ua-hero">
+    <h1>🔗 URL Analyzer</h1>
+    <p>Paste any link to see exactly where it leads and how risky it is — before you click.</p>
+  </div>
+  <div class="ua-card">
+    <div class="ua-input-row">
+      <input class="ua-input" id="uaInput" type="url" placeholder="Paste a URL — e.g. https://bit.ly/win-prize-now" autocomplete="off"/>
+      <button class="btn btn--primary" id="uaAnalyzeBtn" style="min-width:130px">
+        <span class="btn__label">Analyze</span><span class="btn__spinner" aria-hidden="true"></span>
+      </button>
+    </div>
+    <div class="ua-examples">
+      <span class="ua-example-lbl">Try:</span>
+      <button class="ua-ex-btn" data-val="http://gtb-verify-account.tk/login?token=xyz">Fake GTBank</button>
+      <button class="ua-ex-btn" data-val="https://bit.ly/claim-prize-now">Shortened URL</button>
+      <button class="ua-ex-btn" data-val="https://192.168.1.1/bank/login">IP-based URL</button>
+      <button class="ua-ex-btn" data-val="https://paystack.com">Real Paystack</button>
+    </div>
+    <div class="ua-result" id="uaResult" hidden></div>
+  </div>
+</main>
+<script>
+document.addEventListener('DOMContentLoaded',()=>{
+  const input = document.getElementById('uaInput');
+  const btn   = document.getElementById('uaAnalyzeBtn');
+  const result= document.getElementById('uaResult');
+
+  document.querySelectorAll('.ua-ex-btn').forEach(b=>{
+    b.addEventListener('click',()=>{input.value=b.dataset.val;doAnalyze();});
+  });
+  btn.addEventListener('click', doAnalyze);
+  input.addEventListener('keydown', e=>{if(e.key==='Enter')doAnalyze();});
+
+  async function doAnalyze(){
+    const url=input.value.trim();
+    if(!url){input.focus();return;}
+    btn.classList.add('is-loading');btn.disabled=true;result.hidden=true;
+    try{
+      const res=await fetch('/api/url/analyze',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({url})});
+      const d=await res.json();
+      renderResult(d, url);
+    }catch(e){
+      result.innerHTML='<div style="padding:16px;font-size:0.84rem;color:var(--color-danger)">Connection error. Please try again.</div>';
+      result.hidden=false;
+    }finally{btn.classList.remove('is-loading');btn.disabled=false;}
+  }
+
+  const VERDICT_LABELS={safe:'✅ Safe',suspicious:'⚠️ Suspicious',scam:'🚨 Dangerous'};
+  const VERDICT_ADVICE={
+    safe:'This URL appears safe based on our analysis. Always verify the site content before entering personal information.',
+    suspicious:'Proceed with extreme caution. This URL has suspicious signals — do not enter passwords, OTPs, or personal data.',
+    scam:'Do NOT visit this URL. It shows strong indicators of being a phishing or scam site. Block and report the sender.'
+  };
+
+  function renderResult(d, rawUrl){
+    const det  = d.details||{};
+    const flags= d.flags||[];
+    const box  = d.verdict==='safe'
+      ? `<div class="ua-safe-box">${VERDICT_ADVICE.safe}</div>`
+      : `<div class="ua-warning-box">🚨 ${VERDICT_ADVICE[d.verdict]||''}</div>`;
+
+    const flagsHtml = flags.length
+      ? `<div class="ua-flags"><h3>Risk signals detected</h3>${flags.map(f=>`<div class="ua-flag-item">${esc(f)}</div>`).join('')}</div>`
+      : '';
+
+    const brand = det.brand_match ? `<div class="ua-detail-row"><span>Brand impersonated</span><span style="color:var(--color-danger)">${esc(det.brand_match)}</span></div>` : '';
+    const shortener = det.shortener ? `<div class="ua-detail-row"><span>URL shortener</span><span style="color:#fbbf24">Yes — destination hidden</span></div>` : '';
+    const ip = det.ip_based ? `<div class="ua-detail-row"><span>IP-based URL</span><span style="color:var(--color-danger)">Yes — no domain</span></div>` : '';
+    const tld = det.tld ? `<div class="ua-detail-row"><span>Domain TLD</span><span style="color:#fbbf24">${esc(det.tld)} (free/risky)</span></div>` : '';
+
+    result.innerHTML=`
+      <div class="ua-result__header" style="background:${d.verdict==='safe'?'rgba(52,211,153,0.06)':d.verdict==='scam'?'rgba(255,92,114,0.06)':'rgba(251,191,36,0.06)'};border-bottom:1px solid ${d.verdict==='safe'?'rgba(52,211,153,0.15)':d.verdict==='scam'?'rgba(255,92,114,0.15)':'rgba(251,191,36,0.15)'}">
+        <span class="ua-result__badge verdict--${d.verdict}">${VERDICT_LABELS[d.verdict]||d.verdict}</span>
+        <div class="ua-result__meta">
+          <p class="ua-result__score">Risk score: ${d.score}/100</p>
+          <p class="ua-result__host">${esc(det.host||rawUrl)}</p>
+        </div>
+      </div>
+      ${box}
+      <div class="ua-details">
+        <div class="ua-details-col">
+          <h3>URL breakdown</h3>
+          <div class="ua-detail-row"><span>Host</span><span>${esc(det.host||'—')}</span></div>
+          <div class="ua-detail-row"><span>Protocol</span><span style="${det.scheme==='http'?'color:#fbbf24':'color:var(--color-safe)'}">${esc(det.scheme||'—')}</span></div>
+          <div class="ua-detail-row"><span>Port</span><span>${esc(det.port||'default')}</span></div>
+          ${tld}
+        </div>
+        <div class="ua-details-col">
+          <h3>Risk signals</h3>
+          ${brand}${shortener}${ip}
+          <div class="ua-detail-row"><span>Flags found</span><span>${flags.length}</span></div>
+          <div class="ua-detail-row"><span>Risk score</span><span style="font-family:var(--font-display)">${d.score}/100</span></div>
+        </div>
+      </div>
+      ${flagsHtml}`;
+    result.hidden=false;
+  }
+
+  function esc(s){const d=document.createElement('div');d.textContent=String(s||'');return d.innerHTML;}
+});
+</script>
+</body>
+</html>

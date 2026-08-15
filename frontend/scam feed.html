@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Scam Alert Feed — Recent Scams Reported | Veridict</title>
+<meta name="description" content="Real scam patterns reported by the Veridict community — updated regularly. See what scams are trending right now and protect yourself."/>
+<meta property="og:title" content="Scam Alert Feed — Veridict"/>
+<meta property="og:description" content="See the latest scam patterns being reported right now. Stay ahead of scammers."/>
+<meta property="og:type" content="website"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="main.css"/><link rel="stylesheet" href="pages.css"/>
+<link rel="manifest" href="/manifest.json"/>
+<style>
+.sf-hero{text-align:center;padding:40px 24px 32px}
+.sf-hero h1{font-family:var(--v-font-d);font-size:clamp(1.7rem,3vw,2.3rem);font-weight:700;letter-spacing:-.02em;margin-bottom:10px}
+.sf-hero p{font-size:.9rem;color:var(--v-muted);max-width:480px;margin:0 auto}
+.sf-stats-row{display:flex;justify-content:center;gap:36px;padding:20px 24px;flex-wrap:wrap;border-top:1px solid var(--v-border);border-bottom:1px solid var(--v-border);margin-bottom:28px}
+.sf-stat{text-align:center}
+.sf-stat__num{font-family:var(--v-font-d);font-size:1.6rem;font-weight:700;color:var(--v-purple-lt)}
+.sf-stat__label{font-size:.74rem;color:var(--v-faint);margin-top:2px}
+.sf-filter-bar{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:24px}
+.sf-filter-btn{padding:6px 15px;border-radius:999px;border:1px solid var(--v-border-md);background:transparent;color:var(--v-muted);font-size:.78rem;cursor:pointer;transition:all .15s}
+.sf-filter-btn:hover{border-color:var(--v-purple)}
+.sf-filter-btn.is-active{background:rgba(201,147,46,.16);border-color:rgba(201,147,46,.4);color:var(--v-purple-lt)}
+.sf-report{padding:18px 20px;border-radius:var(--v-r-md);background:var(--v-card);border:1px solid var(--v-border);margin-bottom:12px;display:flex;gap:14px}
+.sf-report__icon{width:38px;height:38px;border-radius:10px;background:rgba(201,147,46,.12);border:1px solid rgba(201,147,46,.25);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sf-report__type{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--v-purple-lt);margin-bottom:5px}
+.sf-report__text{font-size:.86rem;color:var(--v-text);line-height:1.6;margin-bottom:8px}
+.sf-report__meta{display:flex;align-items:center;gap:10px;font-size:.72rem;color:var(--v-faint)}
+.sf-report__verdict{font-weight:700;text-transform:capitalize;padding:2px 8px;border-radius:999px}
+.sf-verdict--scam{background:rgba(214,69,69,.14);color:var(--v-danger)}
+.sf-verdict--suspicious{background:rgba(201,147,46,.14);color:var(--v-purple-lt)}
+.sf-cta-box{text-align:center;padding:32px 24px;margin-top:32px;border-radius:var(--v-r-lg);background:linear-gradient(135deg,rgba(201,147,46,.1),rgba(59,130,246,.05));border:1px solid rgba(201,147,46,.25)}
+.sf-cta-box h2{font-family:var(--v-font-d);font-size:1.2rem;font-weight:600;margin-bottom:8px}
+.sf-cta-box p{font-size:.86rem;color:var(--v-muted);margin-bottom:18px}
+.sf-load-more{width:100%;padding:12px;border-radius:var(--v-r-md);border:1px solid var(--v-border-md);background:transparent;color:var(--v-muted);font-size:.84rem;cursor:pointer;margin-top:8px}
+.sf-load-more:hover{background:rgba(255,255,255,.04)}
+.sf-empty{text-align:center;padding:48px;color:var(--v-faint);font-size:.86rem}
+</style>
+</head><body class="p-body">
+
+<nav class="landing-nav">
+  <a href="/" class="landing-nav__logo">
+    <div class="landing-nav__logo-icon"><svg width="20" height="20" viewBox="0 0 28 28" fill="none"><path d="M14 2L25 7.5V15.5C25 20.5 20 24.5 14 26C8 24.5 3 20.5 3 15.5V7.5L14 2Z" fill="rgba(255,255,255,.15)" stroke="rgba(255,255,255,.5)" stroke-width="1.5"/><path d="M9 14L12.5 17.5L19 11" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <span class="landing-nav__logo-name">VERI<span>DICT</span></span>
+  </a>
+  <div class="landing-nav__links">
+    <a href="/" class="landing-nav__link">Home</a>
+    <a href="/scam-feed" class="landing-nav__link" style="color:var(--v-text)">Scam Feed</a>
+    <a href="/tips" class="landing-nav__link">Safety Tips</a>
+  </div>
+  <div class="landing-nav__actions">
+    <a href="/login" class="btn btn--outline btn--sm">Log in</a>
+    <a href="/register" class="btn btn--primary btn--sm">Get started free</a>
+  </div>
+</nav>
+
+<main style="max-width:760px;margin:0 auto;padding:0 24px 80px">
+  <div class="sf-hero">
+    <h1>Scam Alert Feed</h1>
+    <p>Real scam patterns reported by the Veridict community — updated as they come in. See what's trending right now.</p>
+  </div>
+
+  <div class="sf-stats-row" id="statsRow">
+    <div class="sf-stat"><div class="sf-stat__num" id="statTotal">—</div><div class="sf-stat__label">Total reports</div></div>
+    <div class="sf-stat"><div class="sf-stat__num" id="statWeek">—</div><div class="sf-stat__label">This week</div></div>
+    <div class="sf-stat"><div class="sf-stat__num" id="statTop">—</div><div class="sf-stat__label">Most common type</div></div>
+  </div>
+
+  <div class="sf-filter-bar" id="filterBar">
+    <button class="sf-filter-btn is-active" data-type="all">All</button>
+    <button class="sf-filter-btn" data-type="message">Messages</button>
+    <button class="sf-filter-btn" data-type="email">Email</button>
+    <button class="sf-filter-btn" data-type="phone">Phone</button>
+    <button class="sf-filter-btn" data-type="website">Website</button>
+    <button class="sf-filter-btn" data-type="investment">Investment</button>
+    <button class="sf-filter-btn" data-type="job">Job offers</button>
+  </div>
+
+  <div id="reportsContainer"><div class="sf-empty">Loading recent reports…</div></div>
+  <button class="sf-load-more" id="loadMoreBtn" hidden>Load more reports</button>
+
+  <div class="sf-cta-box">
+    <h2>Not sure if something is a scam?</h2>
+    <p>Paste it into Veridict and get an instant, explained verdict — free.</p>
+    <a href="/register" class="btn btn--primary">Scan it free →</a>
+  </div>
+</main>
+
+<footer class="landing-footer">
+  <div class="landing-footer__copy">© 2025 Jyram Labs · Veridict — Know before you click.</div>
+  <div class="landing-footer__links"><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  let currentPage = 1;
+  let currentType = 'all';
+
+  const ICONS = { message:'💬', email:'📧', phone:'📞', website:'🌐', investment:'💰', job:'💼', prize:'🏆', delivery:'📦', bank:'🏦', other:'⚠️' };
+  const LABELS = { message:'Message', email:'Email', phone:'Phone Call', website:'Website', investment:'Investment', job:'Job Offer', prize:'Prize/Lottery', delivery:'Delivery', bank:'Bank Impersonation', other:'Other' };
+
+  loadStats();
+  loadReports(1, true);
+
+  async function loadStats() {
+    try {
+      const r = await fetch('/api/scam-feed/stats');
+      const d = await r.json();
+      document.getElementById('statTotal').textContent = d.total_reports || 0;
+      document.getElementById('statWeek').textContent = d.this_week || 0;
+      document.getElementById('statTop').textContent = d.top_types?.[0] ? (LABELS[d.top_types[0].type] || d.top_types[0].type) : '—';
+    } catch(e) {}
+  }
+
+  async function loadReports(page, reset) {
+    try {
+      const url = `/api/scam-feed?page=${page}&limit=15${currentType !== 'all' ? '&type=' + currentType : ''}`;
+      const r = await fetch(url);
+      const d = await r.json();
+      const container = document.getElementById('reportsContainer');
+      if (reset) container.innerHTML = '';
+
+      if (!d.reports.length && reset) {
+        container.innerHTML = '<div class="sf-empty">No reports yet for this category. Be the first to report a scam from the app.</div>';
+        document.getElementById('loadMoreBtn').hidden = true;
+        return;
+      }
+
+      d.reports.forEach(rep => container.appendChild(buildCard(rep)));
+      document.getElementById('loadMoreBtn').hidden = !d.has_more;
+    } catch(e) {
+      document.getElementById('reportsContainer').innerHTML = '<div class="sf-empty">Could not load reports right now.</div>';
+    }
+  }
+
+  function buildCard(rep) {
+    const div = document.createElement('div');
+    div.className = 'sf-report';
+    const ago = timeAgo(rep.reported_at);
+    div.innerHTML = `
+      <div class="sf-report__icon">${ICONS[rep.scam_type] || '⚠️'}</div>
+      <div style="flex:1">
+        <div class="sf-report__type">${LABELS[rep.scam_type] || rep.scam_type}</div>
+        <p class="sf-report__text">${esc(rep.description)}</p>
+        <div class="sf-report__meta">
+          <span class="sf-report__verdict sf-verdict--${rep.verdict}">${rep.verdict}</span>
+          <span>${ago}</span>
+          <span>👍 ${rep.upvotes || 0}</span>
+        </div>
+      </div>`;
+    return div;
+  }
+
+  document.querySelectorAll('.sf-filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      currentType = btn.dataset.type;
+      currentPage = 1;
+      document.querySelectorAll('.sf-filter-btn').forEach(b => b.classList.remove('is-active'));
+      btn.classList.add('is-active');
+      loadReports(1, true);
+    });
+  });
+
+  document.getElementById('loadMoreBtn').addEventListener('click', () => {
+    currentPage++;
+    loadReports(currentPage, false);
+  });
+
+  function timeAgo(iso) {
+    try {
+      const m = Math.floor((Date.now() - new Date(iso)) / 60000);
+      if (m < 1) return 'just now';
+      if (m < 60) return m + 'm ago';
+      const h = Math.floor(m / 60);
+      if (h < 24) return h + 'h ago';
+      return Math.floor(h / 24) + 'd ago';
+    } catch(e) { return ''; }
+  }
+  function esc(s) { const d = document.createElement('div'); d.textContent = String(s||''); return d.innerHTML; }
+});
+</script>
+</body></html>

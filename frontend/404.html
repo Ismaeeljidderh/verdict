@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Veridict — Page not found</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css"/>
+<style>
+  .error-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    text-align: center;
+    padding: 24px;
+    position: relative;
+  }
+  .error-page::before {
+    content: "";
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(124, 92, 252, 0.18) 0%, transparent 68%);
+    filter: blur(40px);
+    pointer-events: none;
+  }
+  .error-code {
+    font-family: var(--font-display);
+    font-size: clamp(5rem, 12vw, 9rem);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    background: linear-gradient(135deg, #7c5cfc, #4f8fff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    line-height: 1;
+    margin: 0 0 16px;
+    position: relative;
+  }
+  .error-title {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-weight: 600;
+    margin: 0 0 12px;
+    letter-spacing: -0.01em;
+    position: relative;
+  }
+  .error-sub {
+    font-size: 0.92rem;
+    color: var(--color-text-muted);
+    max-width: 380px;
+    line-height: 1.6;
+    margin: 0 0 36px;
+    position: relative;
+  }
+  .error-actions {
+    display: flex;
+    gap: 12px;
+    position: relative;
+  }
+  .error-actions a { text-decoration: none; }
+  .error-logo {
+    position: absolute;
+    top: 28px;
+    left: 36px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: var(--color-text);
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+</style>
+<link rel="manifest" href="/manifest.json"/>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%237C5CFC'/%3E%3Cstop offset='1' stop-color='%234F8FFF'/%3E%3C/linearGradient%3E%3Cpath d='M14 2L24.39 8V20L14 26L3.61 20V8L14 2Z' stroke='url(%23g)' stroke-width='2' fill='none'/%3E%3Cpath d='M8.5 11.5L14 19L19.5 11.5' stroke='url(%23g)' stroke-width='2.5' stroke-linecap='round' fill='none'/%3E%3C/svg%3E"/>
+<meta property="og:type" content="website"/>
+<meta property="og:title" content="Veridict — Page not found"/>
+<meta property="og:description" content="The page you're looking for doesn't exist."/>
+<meta property="og:image" content="https://veridict.onrender.com/og-image.png"/>
+<meta property="og:site_name" content="Veridict"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="Veridict — Page not found"/>
+<meta name="twitter:description" content="The page you're looking for doesn't exist."/>
+</head>
+<body>
+<a href="/" class="error-logo">
+  <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
+    <path d="M14 2L24.39 8V20L14 26L3.61 20V8L14 2Z" stroke="url(#g)" stroke-width="1.5" stroke-linejoin="round"/>
+    <path d="M8.5 11.5L14 19L19.5 11.5" stroke="url(#g)" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"/>
+    <defs>
+      <linearGradient id="g" x1="3.61" y1="2" x2="24.39" y2="26" gradientUnits="userSpaceOnUse">
+        <stop stop-color="#7C5CFC"/><stop offset="1" stop-color="#4F8FFF"/>
+      </linearGradient>
+    </defs>
+  </svg>
+  Veridict
+</a>
+
+<div style="position:fixed;top:20px;left:24px;z-index:10">
+  <a href="/" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px 6px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:rgba(232,233,240,0.7);font-family:Inter,sans-serif;font-size:0.8rem;font-weight:500;text-decoration:none;transition:all 0.18s" onmouseover="this.style.color='#e8e9f0';this.style.background='rgba(255,255,255,0.08)';this.querySelector('svg').style.transform='translateX(-3px)'" onmouseout="this.style.color='rgba(232,233,240,0.7)';this.style.background='rgba(255,255,255,0.04)';this.querySelector('svg').style.transform='translateX(0)'">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.18s"><path d="M19 12H5"/><path d="M11 18l-6-6 6-6"/></svg>
+    Home
+  </a>
+</div>
+<main class="error-page">
+  <p class="error-code">404</p>
+  <h1 class="error-title">Page not found</h1>
+  <p class="error-sub">The page you're looking for doesn't exist or has been moved. Let's get you back on track.</p>
+  <div class="error-actions">
+    <a href="/" class="btn btn--primary">Go home</a>
+    <a href="/dashboard" class="btn btn--secondary">Dashboard</a>
+  </div>
+</main>
+</body>
+</html>

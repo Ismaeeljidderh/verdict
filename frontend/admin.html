@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Veridict — Admin Panel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="main.css"/><link rel="stylesheet" href="pages.css"/>
+<link rel="manifest" href="/manifest.json"/>
+<style>
+.admin-stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.admin-stat{padding:18px;border-radius:var(--v-r-md);background:var(--v-card);border:1px solid var(--v-border)}
+.admin-stat__value{font-family:var(--v-font-d);font-size:1.7rem;font-weight:700}
+.admin-table{width:100%;border-collapse:collapse;font-size:.82rem}
+.admin-table th{text-align:left;padding:0 10px 10px;font-size:.7rem;font-weight:600;text-transform:uppercase;color:var(--v-faint);border-bottom:1px solid var(--v-border)}
+.admin-table td{padding:10px;border-bottom:1px solid var(--v-border)}
+.admin-toggle-btn{padding:4px 12px;border-radius:6px;border:1px solid var(--v-border-md);background:transparent;color:var(--v-muted);font-size:.72rem;cursor:pointer}
+.admin-toggle-btn.is-premium{background:rgba(201,147,46,.14);border-color:rgba(201,147,46,.35);color:var(--v-purple-lt)}
+.admin-search{padding:9px 14px;border-radius:var(--v-r-sm);background:var(--v-input);border:1px solid var(--v-border-md);color:var(--v-text);font-size:.85rem;outline:none;width:240px}
+</style>
+</head><body class="p-body">
+<header class="v-topbar">
+  <a href="/dashboard" class="v-topbar__back"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M11 18l-6-6 6-6"/></svg>Dashboard</a>
+  <nav class="v-topbar__nav"><a href="/dashboard" class="v-topbar__link">Dashboard</a><a href="/admin" class="v-topbar__link is-active">Admin</a></nav>
+  <div class="v-topbar__right"><span class="v-topbar__avatar" id="adminAvatar">A</span><span class="v-topbar__name" id="adminName" style="margin-left:8px">Admin</span></div>
+</header>
+<main class="p-main p-main--wide">
+  <h1 style="font-family:var(--v-font-d);font-size:1.5rem;font-weight:600;margin-bottom:20px">⚡ Admin Panel</h1>
+  <div class="admin-stat-grid">
+    <div class="admin-stat"><div style="font-size:.74rem;color:var(--v-muted);margin-bottom:6px">Total users</div><div class="admin-stat__value" id="adminStatUsers">—</div></div>
+    <div class="admin-stat"><div style="font-size:.74rem;color:var(--v-muted);margin-bottom:6px">Premium users</div><div class="admin-stat__value" style="color:var(--v-purple-lt)" id="adminStatPremium">—</div></div>
+    <div class="admin-stat"><div style="font-size:.74rem;color:var(--v-muted);margin-bottom:6px">Total scans</div><div class="admin-stat__value" id="adminStatScans">—</div></div>
+    <div class="admin-stat"><div style="font-size:.74rem;color:var(--v-muted);margin-bottom:6px">Threats blocked</div><div class="admin-stat__value" style="color:var(--v-danger)" id="adminStatThreats">—</div></div>
+  </div>
+  <div class="p-card">
+    <div style="display:flex;justify-content:space-between;margin-bottom:16px"><h2>Users</h2><input type="text" class="admin-search" id="adminSearch" placeholder="Search…"/></div>
+    <div style="overflow-x:auto">
+      <table class="admin-table">
+        <thead><tr><th>User</th><th>Email</th><th>Username</th><th>Scans</th><th>Plan</th><th>Actions</th></tr></thead>
+        <tbody id="adminTbody"><tr><td colspan="6" style="text-align:center;padding:20px;color:var(--v-faint)">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  let csrfToken='', allUsers=[];
+  try{const r=await fetch('/api/csrf-token',{credentials:'same-origin'});csrfToken=(await r.json()).csrf_token||'';}catch(e){}
+  try {
+    const meRes=await fetch('/api/me',{credentials:'same-origin'}); if(meRes.status===401){window.location.href='/login';return;}
+    const me=await meRes.json(); if(!me.is_admin){window.location.href='/dashboard';return;}
+    document.getElementById('adminAvatar').textContent=(me.full_name||me.username||'A').charAt(0).toUpperCase();
+    document.getElementById('adminName').textContent=me.full_name||me.username;
+  } catch(e){ window.location.href='/dashboard'; return; }
+
+  try {
+    const r=await fetch('/api/admin/stats',{credentials:'same-origin'});
+    if(r.ok){const d=await r.json();document.getElementById('adminStatUsers').textContent=d.total_users||0;document.getElementById('adminStatPremium').textContent=d.premium_users||0;document.getElementById('adminStatScans').textContent=d.total_scans||0;document.getElementById('adminStatThreats').textContent=d.total_threats||0;}
+  } catch(e){}
+  try {
+    const r=await fetch('/api/admin/users',{credentials:'same-origin'});
+    if(r.ok){const d=await r.json();allUsers=d.users||[];renderUsers(allUsers);}
+  } catch(e){ document.getElementById('adminTbody').innerHTML='<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--v-danger)">Could not load users.</td></tr>'; }
+
+  function renderUsers(users) {
+    const tbody=document.getElementById('adminTbody');
+    if(!users.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--v-faint)">No users found.</td></tr>';return;}
+    tbody.innerHTML='';
+    users.forEach(u => {
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td>${esc(u.full_name||'—')}</td><td style="color:var(--v-muted)">${esc(u.email)}</td><td style="color:var(--v-faint)">@${esc(u.username)}</td><td>${u.scan_count||0}</td><td><span style="font-size:.72rem;padding:2px 9px;border-radius:999px;${u.is_premium?'background:rgba(201,147,46,.16);color:var(--v-purple-lt)':'background:rgba(255,255,255,.07);color:var(--v-muted)'}">${u.is_premium?'Premium':'Free'}</span></td><td><button class="admin-toggle-btn ${u.is_premium?'is-premium':''}" data-uid="${u.id}" data-premium="${u.is_premium}">${u.is_premium?'Remove Premium':'Grant Premium'}</button></td>`;
+      tbody.appendChild(tr);
+    });
+    tbody.querySelectorAll('.admin-toggle-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const uid=btn.dataset.uid, current=btn.dataset.premium==='true'; btn.disabled=true; btn.textContent='…';
+        try {
+          const r=await fetch(`/api/admin/users/${uid}/toggle-premium`,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json','X-CSRFToken':csrfToken},body:JSON.stringify({is_premium:!current})});
+          if(r.ok){btn.dataset.premium=String(!current);btn.classList.toggle('is-premium',!current);btn.textContent=!current?'Remove Premium':'Grant Premium';}
+        } catch(e){}
+        btn.disabled=false;
+      });
+    });
+  }
+  document.getElementById('adminSearch').addEventListener('input', e => {
+    const q=e.target.value.toLowerCase();
+    renderUsers(allUsers.filter(u => u.full_name?.toLowerCase().includes(q) || u.email?.toLowerCase().includes(q) || u.username?.toLowerCase().includes(q)));
+  });
+  function esc(s){const d=document.createElement('div');d.textContent=String(s||'');return d.innerHTML;}
+});
+</script>
+</body></html>

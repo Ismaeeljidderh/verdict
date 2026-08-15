@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Veridict — Dashboard</title>
+<meta name="description" content="Your Veridict dashboard. AI-powered scam detection and protection."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="main.css"/>
+<link rel="stylesheet" href="dashboard.css"/>
+<link rel="manifest" href="/manifest.json"/>
+<script src="sw-register.js"></script>
+</head>
+<body>
+<div id="mobileOverlay" style="display:none;position:fixed;inset:0;z-index:199;background:rgba(0,0,0,.7);backdrop-filter:blur(4px)" onclick="closeSidebar()"></div>
+<div class="db-layout">
+  <aside class="db-sidebar" id="dbSidebar">
+    <div class="db-logo">
+      <div class="db-logo__icon">
+        <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
+          <path d="M14 2L25 7.5V15.5C25 20.5 20 24.5 14 26C8 24.5 3 20.5 3 15.5V7.5L14 2Z" fill="rgba(255,255,255,.15)" stroke="rgba(255,255,255,.4)" stroke-width="1.5"/>
+          <path d="M9 14L12.5 17.5L19 11" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div><div class="db-logo__name">VERIDICT</div><div class="db-logo__sub">AI-Powered Scam Detection</div></div>
+    </div>
+    <nav class="db-nav">
+      <a href="/trusted-circle" class="db-nav-item">Trusted Circle</a>
+      <div class="db-nav__section">Main</div>
+      <a href="/dashboard" class="db-nav-item is-active"><svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 10L10 3l7 7"/><path d="M5 8.5V17h4v-4h2v4h4V8.5"/></svg>Dashboard</a>
+      <div class="db-nav__section">AI Scanners</div>
+      <a href="/scanner?type=message" class="db-nav-item"><svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 5a2 2 0 012-2h12a2 2 0 012 2v7a2 2 0 01-2 2H9l-4 3v-3H4a2 2 0 01-2-2V5z"/></svg>Message Scanner</a>
+      <a href="/scanner?type=website" class="db-nav-item"><svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="10" r="8"/><path d="M2 10h16M10 2a12 12 0 010 16"/></svg>Website Scanner</a>
+      <a href="/scanner?type=email" class="db-nav-item"><svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="4" width="16" height="12" rx="1"/><path d="M2 5l8 6 8-6"/></svg>Email Scanner</a>
+      <a href="/scanner?type=phone" class="db-nav-item"><svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 5a1 1 0 011-1h2.5l1 3-1.5 1.5a11 11 0 005.5 5.5L13 12.5l3 1V16a1 1 0 01-1 1A13 13 0 013 5z"/></svg>Phone Checker</a>
+      <a href="/scanner?type=screenshot" class="db-nav-item"><svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="4" width="16" height="12" rx="1"/><circle cx="8" cy="10" r="2"/><path d="M14 8l2 2-2 2"/></svg>Screenshot Scanner<span class="db-nav-item__badge">New</span></a>
+      <div class="db-nav__section">Protection</div>
+      <a href="/alerts" class="db-nav-item"><svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 2a6 6 0 00-6 6v3l-2 2v1h16v-1l-2-2V8a6 6 0 00-6-6z"/><path d="M8 15a2 2 0 004 0"/></svg>Scam Alerts</a>
+      <a href="/community" class="db-nav-item"><svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM5 16a5 5 0 0110 0"/></svg>Community Reports</a>
+      <a href="/tips" class="db-nav-item"><svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="10" r="8"/><path d="M10 6v4M10 14h.01"/></svg>Safety Tips</a>
+      <div class="db-nav__section">Account</div>
+      <a href="/alerts" class="db-nav-item"><svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="10" r="8"/><path d="M10 6v4l3 3"/></svg>Scan History</a>
+      <a href="/plan" class="db-nav-item"><svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 5h14M3 10h14M3 15h6"/></svg>My Plan</a>
+      <a href="/settings" class="db-nav-item"><svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="10" r="3"/><path d="M10 1v2M10 17v2M1 10h2M17 10h2M3.22 3.22l1.42 1.42M15.36 15.36l1.42 1.42M3.22 16.78l1.42-1.42M15.36 4.64l1.42-1.42"/></svg>Settings</a>
+      <button class="db-nav-item" id="logoutBtn"><svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M13 15l4-5-4-5M17 10H7M7 3H4a1 1 0 00-1 1v12a1 1 0 001 1h3"/></svg>Log Out</button>
+    </nav>
+    <div class="db-plan-card">
+      <div class="db-plan-card__top">
+        <div><div class="db-plan-card__label">Current Plan</div><div class="db-plan-card__name" id="planCardName">Free Plan</div></div>
+        <a href="/plan" class="db-plan-card__upgrade">Upgrade</a>
+      </div>
+      <div class="db-plan-card__scans">Scans Left This Week<br/><strong id="planCardScans">— / 10</strong></div>
+      <div class="db-plan-card__bar"><div class="db-plan-card__bar-fill" id="planCardBar" style="width:0%"></div></div>
+    </div>
+  </aside>
+
+  <div class="db-main">
+    <header class="db-topbar">
+      <div style="display:flex;align-items:center;gap:12px">
+        <button class="db-mobile-menu-btn" onclick="openSidebar()" aria-label="Menu"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg></button>
+        <div class="db-topbar__greet"><h1 id="dbGreeting">Welcome back! </h1><p>Stay smart. Stay safe. We've got your back.</p></div>
+      </div>
+      <div class="db-topbar__right">
+        <button class="db-topbar__icon-btn" onclick="window.location='/alerts'" title="Alerts"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 2a6 6 0 00-6 6v3l-2 2v1h16v-1l-2-2V8a6 6 0 00-6-6z"/><path d="M8 15a2 2 0 004 0"/></svg><span class="db-topbar__notif-dot" id="notifDot" style="display:none"></span></button>
+        <button class="db-topbar__icon-btn" onclick="window.location='/tips'" title="Help"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="10" r="8"/><path d="M10 6v4M10 14h.01"/></svg></button>
+        <a href="/settings" class="db-topbar__user"><div class="db-topbar__avatar" id="topbarAvatar">V</div><span class="db-topbar__name" id="topbarName">Loading…</span><span class="db-topbar__plan-badge" id="topbarBadge">FREE</span></a>
+      </div>
+    </header>
+
+    <div class="db-body">
+      <div class="db-verify-banner" id="verifyBanner" style="display:none"><span><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" style="display:inline-block;vertical-align:-3px"><rect x="2" y="4" width="16" height="12" rx="1"/><path d="M2 5l8 6 8-6"/></svg></span><p>Please verify your email to unlock all features.</p><button id="resendVerifyBtn">Resend email</button></div>
+      <div class="db-upgrade-banner" id="upgradeBanner" style="display:none">
+        <div class="db-upgrade-banner__text"><p>You've used all your free scans this week</p><p>Watch a short ad for 3 bonus scans — or upgrade to Premium for unlimited.</p></div>
+        <div class="db-upgrade-banner__btns"><button class="db-upgrade-btn db-upgrade-btn--ad" id="watchAdBtn"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" style="display:inline-block;vertical-align:-3px"><rect x="2" y="4" width="16" height="11" rx="1"/><path d="M7 18h6M10 15v3"/></svg> Watch ad (+3 scans)</button><a href="/plan" class="db-upgrade-btn db-upgrade-btn--up">Upgrade now →</a></div>
+      </div>
+
+      <div class="db-stats">
+        <div class="db-stat-card db-stat-card--purple">
+          <div class="db-stat-card__label">Total Scans</div><div class="db-stat-card__value" id="statTotal">0</div><div class="db-stat-card__sub"><span class="up" id="statTotalSub">0 this week</span></div>
+          <div class="db-stat-card__chart"><svg width="60" height="34" viewBox="0 0 64 36"><defs><linearGradient id="sg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e0ac4a" stop-opacity=".4"/><stop offset="1" stop-color="#e0ac4a" stop-opacity="0"/></linearGradient></defs><path d="M0 28 Q8 20 16 22 Q24 24 32 14 Q40 4 48 8 Q56 12 64 6" fill="none" stroke="#e0ac4a" stroke-width="2" stroke-linecap="round"/><path d="M0 28 Q8 20 16 22 Q24 24 32 14 Q40 4 48 8 Q56 12 64 6 L64 36 L0 36Z" fill="url(#sg1)"/></svg></div>
+        </div>
+        <div class="db-stat-card db-stat-card--danger">
+          <div class="db-stat-card__label">Threats Detected</div><div class="db-stat-card__value" id="statThreats">0</div><div class="db-stat-card__sub"><span class="down" id="statThreatsSub">0 blocked</span></div>
+          <div class="db-stat-card__chart"><svg width="60" height="34" viewBox="0 0 64 36"><defs><linearGradient id="sg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ef4444" stop-opacity=".4"/><stop offset="1" stop-color="#ef4444" stop-opacity="0"/></linearGradient></defs><path d="M0 30 Q8 28 16 26 Q24 24 32 18 Q40 12 48 16 Q56 20 64 10" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/><path d="M0 30 Q8 28 16 26 Q24 24 32 18 Q40 12 48 16 Q56 20 64 10 L64 36 L0 36Z" fill="url(#sg2)"/></svg></div>
+        </div>
+        <div class="db-stat-card">
+          <div class="db-stat-card__label">Scans Left</div><div class="db-stat-card__value" id="statLeft">—</div><div class="db-stat-card__sub" id="statLeftSub">Resets weekly</div>
+          <div class="db-stat-card__chart"><svg width="54" height="54" viewBox="0 0 56 56"><circle cx="28" cy="28" r="22" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="5"/><circle id="donutRing" cx="28" cy="28" r="22" fill="none" stroke="url(#dg)" stroke-width="5" stroke-linecap="round" stroke-dasharray="138.2" stroke-dashoffset="138.2" transform="rotate(-90 28 28)" style="transition:stroke-dasharray 1s ease"/><defs><linearGradient id="dg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7ba3bd"/><stop offset="1" stop-color="#e0ac4a"/></linearGradient></defs></svg></div>
+        </div>
+        <div class="db-stat-card">
+          <div class="db-stat-card__label">Account Plan</div><div class="db-stat-card__plan-name" id="statPlanName">Free Plan</div><div class="db-stat-card__plan-sub" id="statPlanSub">Upgrade for unlimited scans</div>
+          <div class="db-stat-card__icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(224,172,74,.6)" stroke-width="1.8"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg></div>
+        </div>
+      </div>
+
+      <div class="db-middle">
+        <div class="db-hero">
+          <div class="db-hero__content">
+            <h2 class="db-hero__title">Detect Scams.<br/>Protect Yourself.<br/>Stay <span class="accent">One Step Ahead.</span></h2>
+            <p class="db-hero__desc">Veridict uses advanced AI to detect scams, phishing attempts, and online threats before they reach you.</p>
+            <div class="db-hero__btns">
+              <a href="/scanner" class="db-hero__btn--primary">Start New Scan<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+              <a href="/tips" class="db-hero__btn--outline"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8" fill="currentColor"/></svg>How it Works</a>
+            </div>
+          </div>
+          <div class="db-hero__shield">
+            <div class="db-shield-orbit"><div class="db-orbit-icon"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" style="display:inline-block;vertical-align:-3px"><rect x="2" y="4" width="16" height="12" rx="1"/><path d="M2 5l8 6 8-6"/></svg></div><div class="db-orbit-icon"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" style="display:inline-block;vertical-align:-3px"><circle cx="10" cy="10" r="8"/><path d="M2 10h16M10 2a12 12 0 010 16"/></svg></div><div class="db-orbit-icon"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" style="display:inline-block;vertical-align:-3px"><rect x="5" y="2" width="10" height="16" rx="1.5"/><path d="M9 15h2"/></svg></div><div class="db-orbit-icon"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" style="display:inline-block;vertical-align:-3px"><path d="M2 5a2 2 0 012-2h12a2 2 0 012 2v7a2 2 0 01-2 2H9l-4 3v-3H4a2 2 0 01-2-2V5z"/></svg></div></div>
+            <div class="db-shield-3d"><svg class="db-shield-svg" width="80" height="80" viewBox="0 0 28 28" fill="none"><path d="M14 2L25 7.5V15.5C25 20.5 20 24.5 14 26C8 24.5 3 20.5 3 15.5V7.5L14 2Z" fill="rgba(224,172,74,.3)" stroke="rgba(224,172,74,.8)" stroke-width="1.2"/><path d="M8.5 14L12 17.5L19.5 10" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+        </div>
+        <div class="db-right-col">
+          <div class="db-risk-card">
+            <div class="db-risk-card__title">Risk Overview</div>
+            <div class="db-risk-donut">
+              <div class="db-risk-donut__chart">
+                <svg width="96" height="96" viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="38" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="12"/>
+                  <circle id="riskHigh" cx="50" cy="50" r="38" fill="none" stroke="#ef4444" stroke-width="12" stroke-dasharray="0 238.76" transform="rotate(-90 50 50)" style="transition:stroke-dasharray 1s ease"/>
+                  <circle id="riskMed" cx="50" cy="50" r="38" fill="none" stroke="#f59e0b" stroke-width="12" stroke-dasharray="0 238.76" transform="rotate(-90 50 50)" style="transition:stroke-dasharray 1s ease"/>
+                  <circle id="riskLow" cx="50" cy="50" r="38" fill="none" stroke="#22c55e" stroke-width="12" stroke-dasharray="0 238.76" transform="rotate(-90 50 50)" style="transition:stroke-dasharray 1s ease"/>
+                </svg>
+                <div class="db-risk-donut__center"><div class="db-risk-donut__num" id="riskTotal">0</div><div class="db-risk-donut__sub">Total<br/>Threats</div></div>
+              </div>
+              <div class="db-risk-legend">
+                <div class="db-risk-legend-item"><div class="db-risk-dot" style="background:#ef4444"></div><span class="db-risk-label">High Risk</span><span class="db-risk-count" id="riskHighCount">0 (0%)</span></div>
+                <div class="db-risk-legend-item"><div class="db-risk-dot" style="background:#f59e0b"></div><span class="db-risk-label">Medium Risk</span><span class="db-risk-count" id="riskMedCount">0 (0%)</span></div>
+                <div class="db-risk-legend-item"><div class="db-risk-dot" style="background:#22c55e"></div><span class="db-risk-label">Low Risk</span><span class="db-risk-count" id="riskLowCount">0 (0%)</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="db-alerts-card">
+            <div class="db-alerts-card__header"><div class="db-alerts-card__title">Recent Alerts</div><a href="/alerts" class="db-alerts-card__view">View All</a></div>
+            <div id="recentAlertsList"><div style="font-size:.76rem;color:var(--db-faint);text-align:center;padding:14px">No alerts yet.</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="db-tools-section">
+        <div class="db-tools-title">AI Scanner Tools</div>
+        <div class="db-tools-grid">
+          <a href="/scanner?type=message" class="db-tool-card"><div class="db-tool-card__icon" style="background:rgba(224,172,74,.18);border:1px solid rgba(224,172,74,.3)"><svg width="22" height="22" viewBox="0 0 20 20" fill="none" stroke="#e0ac4a" stroke-width="1.8"><path d="M2 5a2 2 0 012-2h12a2 2 0 012 2v7a2 2 0 01-2 2H9l-4 3v-3H4a2 2 0 01-2-2V5z"/></svg></div><div class="db-tool-card__name">Message Scanner</div><div class="db-tool-card__desc">Scan WhatsApp, SMS and other messages for scams.</div><div class="db-tool-card__cta">Scan Now →</div></a>
+          <a href="/scanner?type=website" class="db-tool-card"><div class="db-tool-card__icon" style="background:rgba(20,184,166,.15);border:1px solid rgba(20,184,166,.3)"><svg width="22" height="22" viewBox="0 0 20 20" fill="none" stroke="#14b8a6" stroke-width="1.8"><circle cx="10" cy="10" r="8"/><path d="M2 10h16M10 2a12 12 0 010 16"/></svg></div><div class="db-tool-card__name">Website Scanner</div><div class="db-tool-card__desc">Check if a website is safe or a phishing attempt.</div><div class="db-tool-card__cta">Scan Now →</div></a>
+          <a href="/scanner?type=email" class="db-tool-card"><div class="db-tool-card__icon" style="background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3)"><svg width="22" height="22" viewBox="0 0 20 20" fill="none" stroke="#22c55e" stroke-width="1.8"><rect x="2" y="4" width="16" height="12" rx="1"/><path d="M2 5l8 6 8-6"/></svg></div><div class="db-tool-card__name">Email Scanner</div><div class="db-tool-card__desc">Detect phishing emails and suspicious content.</div><div class="db-tool-card__cta">Scan Now →</div></a>
+          <a href="/scanner?type=phone" class="db-tool-card"><div class="db-tool-card__icon" style="background:rgba(249,115,22,.15);border:1px solid rgba(249,115,22,.3)"><svg width="22" height="22" viewBox="0 0 20 20" fill="none" stroke="#f97316" stroke-width="1.8"><path d="M3 5a1 1 0 011-1h2.5l1 3-1.5 1.5a11 11 0 005.5 5.5L13 12.5l3 1V16a1 1 0 01-1 1A13 13 0 013 5z"/></svg></div><div class="db-tool-card__name">Phone Checker</div><div class="db-tool-card__desc">Check phone numbers for scam reports and reputation.</div><div class="db-tool-card__cta">Scan Now →</div></a>
+          <a href="/scanner?type=screenshot" class="db-tool-card"><span class="db-tool-card__new">New</span><div class="db-tool-card__icon" style="background:rgba(224,172,74,.18);border:1px solid rgba(224,172,74,.3)"><svg width="22" height="22" viewBox="0 0 20 20" fill="none" stroke="#c9932e" stroke-width="1.8"><rect x="2" y="4" width="16" height="12" rx="1"/><circle cx="8" cy="10" r="2"/><path d="M14 8l2 2-2 2"/></svg></div><div class="db-tool-card__name">Screenshot Scanner</div><div class="db-tool-card__desc">Upload screenshots to detect scam content.</div><div class="db-tool-card__cta">Scan Now →</div></a>
+          <a href="/qr-scanner" class="db-tool-card"><span class="db-tool-card__new">New</span><div class="db-tool-card__icon" style="background:rgba(52,211,153,.15);border:1px solid rgba(52,211,153,.3)"><svg width="22" height="22" viewBox="0 0 20 20" fill="none" stroke="#34d399" stroke-width="1.8"><rect x="2" y="2" width="6" height="6" rx="1"/><rect x="12" y="2" width="6" height="6" rx="1"/><rect x="2" y="12" width="6" height="6" rx="1"/><circle cx="15" cy="15" r="2"/></svg></div><div class="db-tool-card__name">QR Code Scanner</div><div class="db-tool-card__desc">Scan QR codes to see where they lead before clicking.</div><div class="db-tool-card__cta">Scan Now →</div></a>
+          <a href="/business-checker" class="db-tool-card"><div class="db-tool-card__icon" style="background:rgba(79,143,255,.15);border:1px solid rgba(79,143,255,.3)"><svg width="22" height="22" viewBox="0 0 20 20" fill="none" stroke="#7ba3bd" stroke-width="1.8"><rect x="2" y="7" width="16" height="11" rx="1"/><path d="M6 7V5a4 4 0 018 0v2"/><path d="M10 12v2"/></svg></div><div class="db-tool-card__name">Business Checker</div><div class="db-tool-card__desc">Verify if a company is real or detect impersonation.</div><div class="db-tool-card__cta">Check Now →</div></a>
+          <a href="/url-analyzer" class="db-tool-card"><div class="db-tool-card__icon" style="background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.3)"><svg width="22" height="22" viewBox="0 0 20 20" fill="none" stroke="#fbbf24" stroke-width="1.8"><circle cx="10" cy="10" r="8"/><path d="M2 10h16"/><path d="M6 6l8 8M14 6l-8 8"/></svg></div><div class="db-tool-card__name">URL Analyzer</div><div class="db-tool-card__desc">Analyze where a link leads before you click it.</div><div class="db-tool-card__cta">Analyze →</div></a>
+        </div>
+      </div>
+
+      <div class="db-mission">
+        <div class="db-mission__left"><div class="db-mission__icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" style="display:inline-block;vertical-align:-4px"><path d="M10 2l7 3v5c0 4-3 7-7 8-4-1-7-4-7-8V5l7-3z"/></svg></div><div><div class="db-mission__title">Join Our Mission</div><div class="db-mission__sub">Help us build a safer internet. Report scams and protect others.</div></div></div>
+        <a href="/community" class="db-mission__btn">Report a Scam →</a>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="utils.js"></script>
+<script src="dashboard.js"></script>
+<script>
+function openSidebar(){document.getElementById('dbSidebar').classList.add('is-open');document.getElementById('mobileOverlay').style.display='block';document.body.style.overflow='hidden'}
+function closeSidebar(){document.getElementById('dbSidebar').classList.remove('is-open');document.getElementById('mobileOverlay').style.display='none';document.body.style.overflow=''}
+</script>
+</body>
+</html>

@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Veridict — Settings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css"/><link rel="stylesheet" href="nav.css"/>
+<link rel="manifest" href="/manifest.json"/>
+<style>
+.settings-body { background: var(--color-bg); min-height: 100vh; }
+.settings-main { max-width: 740px; margin: 0 auto; padding: 48px 32px 100px; }
+.settings-main h1 { font-family: var(--font-display); font-size: 1.7rem; font-weight: 600; letter-spacing: -0.015em; margin: 0 0 8px; }
+.settings-main > p { color: var(--color-text-muted); font-size: 0.88rem; margin: 0 0 36px; }
+
+/* Profile hero card */
+.profile-hero {
+  display: flex; align-items: center; gap: 20px; padding: 24px 26px;
+  border-radius: 16px; background: linear-gradient(135deg, rgba(124,92,252,0.12), rgba(79,143,255,0.06));
+  border: 1px solid rgba(124,92,252,0.28); margin-bottom: 28px;
+}
+.profile-hero__avatar {
+  width: 64px; height: 64px; border-radius: 50%;
+  background: var(--gradient-primary);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-size: 1.6rem; font-weight: 700; color: #fff;
+  flex-shrink: 0;
+  box-shadow: 0 8px 24px rgba(124,92,252,0.4);
+}
+.profile-hero__info { flex: 1; min-width: 0; }
+.profile-hero__name { font-family: var(--font-display); font-size: 1.2rem; font-weight: 600; margin: 0 0 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.profile-hero__email { font-size: 0.82rem; color: var(--color-text-muted); margin: 0 0 8px; }
+.profile-hero__badges { display: flex; gap: 8px; flex-wrap: wrap; }
+.profile-hero__badge { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 3px 10px; border-radius: 999px; }
+.profile-hero__badge--plan-free    { background: rgba(255,255,255,0.08); color: var(--color-text-muted); }
+.profile-hero__badge--plan-premium { background: var(--gradient-primary); color: #fff; }
+.profile-hero__badge--username { background: rgba(79,143,255,0.14); color: var(--color-blue); border: 1px solid rgba(79,143,255,0.3); }
+
+/* Section cards */
+.settings-section {
+  padding: 24px 26px; border-radius: 14px; background: var(--color-surface);
+  border: 1px solid var(--color-border); margin-bottom: 16px;
+}
+.settings-section__title {
+  font-family: var(--font-display); font-size: 0.95rem; font-weight: 600; margin: 0 0 4px;
+}
+.settings-section__sub { font-size: 0.8rem; color: var(--color-text-muted); margin: 0 0 20px; }
+.settings-form { display: flex; flex-direction: column; gap: 14px; }
+.settings-form .form-field input { transition: border-color 0.18s, box-shadow 0.18s; }
+.settings-form .form-field input:disabled { opacity: 0.55; cursor: not-allowed; }
+.settings-form .form-field label { font-size: 0.8rem; font-weight: 500; }
+.settings-form__row { display: flex; gap: 14px; }
+.settings-form__row .form-field { flex: 1; }
+.settings-btn-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+/* Danger zone */
+.settings-section--danger { border-color: rgba(255,92,114,0.22); }
+.settings-section--danger .settings-section__title { color: var(--color-danger); }
+
+/* Toggle switch */
+.settings-toggle { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--color-border); }
+.settings-toggle:last-child { border-bottom: none; padding-bottom: 0; }
+.settings-toggle__info h4 { font-size: 0.88rem; font-weight: 500; margin: 0 0 3px; }
+.settings-toggle__info p  { font-size: 0.78rem; color: var(--color-text-muted); margin: 0; }
+.toggle-switch { position: relative; width: 38px; height: 22px; flex-shrink: 0; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-switch__track {
+  position: absolute; inset: 0; border-radius: 11px;
+  background: rgba(255,255,255,0.1); border: 1px solid var(--color-border-strong);
+  cursor: pointer; transition: background 0.2s, border-color 0.2s;
+}
+.toggle-switch input:checked + .toggle-switch__track { background: var(--gradient-primary); border-color: transparent; }
+.toggle-switch__track::after {
+  content: ''; position: absolute; left: 3px; top: 50%; transform: translateY(-50%);
+  width: 16px; height: 16px; border-radius: 50%; background: #fff;
+  transition: left 0.18s; box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+.toggle-switch input:checked + .toggle-switch__track::after { left: 19px; }
+
+.settings-link-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--color-border); text-decoration: none; color: var(--color-text); transition: color 0.18s; }
+.settings-link-row:last-child { border-bottom: none; }
+.settings-link-row:hover { color: var(--color-purple); }
+.settings-link-row__left h4 { font-size: 0.88rem; font-weight: 500; margin: 0 0 2px; }
+.settings-link-row__left p  { font-size: 0.76rem; color: var(--color-text-muted); margin: 0; }
+.settings-link-row__arrow { font-size: 0.9rem; color: var(--color-text-faint); transition: transform 0.18s; }
+.settings-link-row:hover .settings-link-row__arrow { transform: translateX(3px); }
+</style>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%237C5CFC'/%3E%3Cstop offset='1' stop-color='%234F8FFF'/%3E%3C/linearGradient%3E%3Cpath d='M14 2L24.39 8V20L14 26L3.61 20V8L14 2Z' stroke='url(%23g)' stroke-width='2' fill='none'/%3E%3Cpath d='M8.5 11.5L14 19L19.5 11.5' stroke='url(%23g)' stroke-width='2.5' stroke-linecap='round' fill='none'/%3E%3C/svg%3E"/>
+<meta property="og:type" content="website"/>
+<meta property="og:title" content="Veridict — Settings"/>
+<meta property="og:description" content="Manage your Veridict account settings, profile, and security."/>
+<meta property="og:image" content="https://veridict.onrender.com/og-image.png"/>
+<meta property="og:site_name" content="Veridict"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="Veridict — Settings"/>
+<meta name="twitter:description" content="Manage your Veridict account settings, profile, and security."/>
+</head>
+<body class="settings-body">
+
+<header class="v-topbar">
+  <div class="v-topbar__left">
+    <a href="/dashboard" class="v-topbar__back">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M11 18l-6-6 6-6"/></svg>
+      Dashboard
+    </a>
+  </div>
+  <nav class="v-topbar__nav">
+    <a href="/dashboard" class="v-topbar__link">Dashboard</a>
+    <a href="/settings" class="v-topbar__link is-active">Settings</a>
+  </nav>
+  <div class="v-topbar__right">
+    <div class="v-topbar__user">
+      <span class="v-topbar__avatar" id="topbarAvatar">V</span>
+      <span class="v-topbar__name" id="topbarName">Loading…</span>
+    </div>
+  </div>
+</header>
+
+<main class="settings-main">
+  <h1>⚙️ Settings</h1>
+  <p>Manage your account, preferences, and security.</p>
+
+  <!-- Profile card -->
+  <div class="profile-hero">
+    <div class="profile-hero__avatar" id="settingsAvatar">V</div>
+    <div class="profile-hero__info">
+      <p class="profile-hero__name" id="settingsDisplayName">Loading…</p>
+      <p class="profile-hero__email" id="settingsDisplayEmail">…</p>
+      <div class="profile-hero__badges">
+        <span class="profile-hero__badge profile-hero__badge--username" id="settingsDisplayUsername">@username</span>
+        <span class="profile-hero__badge" id="settingsPlanBadge">Free</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile -->
+  <div class="settings-section">
+    <h2 class="settings-section__title">Profile information</h2>
+    <p class="settings-section__sub">Update your name and username. Your email cannot be changed.</p>
+    <form id="profileForm" class="settings-form" novalidate>
+      <div class="settings-form__row">
+        <div class="form-field">
+          <label for="settingsFullName">Full name</label>
+          <input type="text" id="settingsFullName" autocomplete="name" required/>
+          <p class="form-field__error" id="fullNameError" role="alert" aria-live="polite"></p>
+        </div>
+        <div class="form-field">
+          <label for="settingsUsername">Username</label>
+          <input type="text" id="settingsUsername" autocomplete="username" required/>
+          <p class="form-field__error" id="usernameError" role="alert" aria-live="polite"></p>
+        </div>
+      </div>
+      <div class="form-field">
+        <label for="settingsEmail">Email (read-only)</label>
+        <input type="email" id="settingsEmail" disabled/>
+      </div>
+      <div class="settings-btn-row">
+        <button type="submit" class="btn btn--primary" id="profileSaveBtn">
+          <span class="btn__label">Save changes</span>
+          <span class="btn__spinner" aria-hidden="true"></span>
+        </button>
+        <p class="form-status" id="profileStatus" role="alert" aria-live="polite"></p>
+      </div>
+    </form>
+  </div>
+
+  <!-- Password -->
+  <div class="settings-section">
+    <h2 class="settings-section__title">Change password</h2>
+    <p class="settings-section__sub" id="passwordSectionSub">Update your Veridict password.</p>
+    <form id="passwordForm" class="settings-form" novalidate id="passwordFormEl">
+      <div class="form-field" id="currentPasswordField">
+        <label for="currentPassword">Current password</label>
+        <input type="password" id="currentPassword" autocomplete="current-password"/>
+        <p class="form-field__error" id="currentPasswordError" role="alert" aria-live="polite"></p>
+      </div>
+      <div class="settings-form__row">
+        <div class="form-field" id="newPasswordField">
+          <label for="newPassword">New password</label>
+          <input type="password" id="newPassword" autocomplete="new-password" placeholder="At least 8 characters"/>
+          <p class="form-field__error" id="newPasswordError" role="alert" aria-live="polite"></p>
+        </div>
+        <div class="form-field" id="confirmPasswordField">
+          <label for="confirmNewPassword">Confirm new password</label>
+          <input type="password" id="confirmNewPassword" autocomplete="new-password"/>
+          <p class="form-field__error" id="confirmNewPasswordError" role="alert" aria-live="polite"></p>
+        </div>
+      </div>
+      <div class="settings-btn-row">
+        <button type="submit" class="btn btn--secondary" id="passwordSaveBtn">
+          <span class="btn__label">Update password</span>
+          <span class="btn__spinner" aria-hidden="true"></span>
+        </button>
+        <p class="form-status" id="passwordStatus" role="alert" aria-live="polite"></p>
+      </div>
+    </form>
+  </div>
+
+  <!-- Preferences -->
+  <div class="settings-section">
+    <h2 class="settings-section__title">Preferences</h2>
+    <p class="settings-section__sub">Control how Veridict behaves for you.</p>
+    <div class="settings-toggle">
+      <div class="settings-toggle__info">
+        <h4>Email alerts for high-risk scans</h4>
+        <p>Get an email when a scan returns a scam verdict.</p>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="toggleEmailAlerts" checked/>
+        <span class="toggle-switch__track"></span>
+      </label>
+    </div>
+    <div class="settings-toggle">
+      <div class="settings-toggle__info">
+        <h4>Save scan history</h4>
+        <p>Store your past scans so you can review them later.</p>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="toggleSaveHistory" checked/>
+        <span class="toggle-switch__track"></span>
+      </label>
+    </div>
+    <div class="settings-toggle">
+      <div class="settings-toggle__info">
+        <h4>Community sharing</h4>
+        <p>Allow anonymised scan patterns to improve community detection.</p>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="toggleCommunity"/>
+        <span class="toggle-switch__track"></span>
+      </label>
+    </div>
+  </div>
+
+  <!-- Quick links -->
+  <div class="settings-section">
+    <h2 class="settings-section__title">Account</h2>
+    <a href="/plan" class="settings-link-row">
+      <div class="settings-link-row__left">
+        <h4>My Plan</h4>
+        <p id="planLinkSub">View your current plan and upgrade options.</p>
+      </div>
+      <span class="settings-link-row__arrow">→</span>
+    </a>
+    <a href="/alerts" class="settings-link-row">
+      <div class="settings-link-row__left">
+        <h4>Scan History &amp; Alerts</h4>
+        <p>Review all your previous scans and threat alerts.</p>
+      </div>
+      <span class="settings-link-row__arrow">→</span>
+    </a>
+    <a href="/privacy" class="settings-link-row">
+      <div class="settings-link-row__left">
+        <h4>Privacy Policy</h4>
+        <p>How we handle and protect your data.</p>
+      </div>
+      <span class="settings-link-row__arrow">→</span>
+    </a>
+    <a href="/terms" class="settings-link-row">
+      <div class="settings-link-row__left">
+        <h4>Terms of Service</h4>
+        <p>The terms that govern your use of Veridict.</p>
+      </div>
+      <span class="settings-link-row__arrow">→</span>
+    </a>
+  </div>
+
+  <!-- Danger zone -->
+  <div class="settings-section settings-section--danger">
+    <h2 class="settings-section__title">⚠ Danger zone</h2>
+    <p class="settings-section__sub">Deleting your account is permanent. All your data, scan history, and subscription will be removed immediately.</p>
+    <form id="deleteForm" class="settings-form" novalidate>
+      <div class="form-field">
+        <label for="deleteConfirm">Type <strong>DELETE</strong> to confirm account deletion</label>
+        <input type="text" id="deleteConfirm" placeholder="DELETE" autocomplete="off"/>
+      </div>
+      <div class="settings-btn-row">
+        <button type="submit" class="btn btn--danger" id="deleteBtn">
+          <span class="btn__label">Delete my account</span>
+          <span class="btn__spinner" aria-hidden="true"></span>
+        </button>
+        <p class="form-status" id="deleteStatus" role="alert" aria-live="polite"></p>
+      </div>
+    </form>
+  </div>
+</main>
+
+<script src="settings.js"></script>
+</body>
+</html>

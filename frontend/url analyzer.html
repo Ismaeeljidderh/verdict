@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Veridict — URL Analyzer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="main.css"/><link rel="stylesheet" href="pages.css"/>
+<link rel="manifest" href="/manifest.json"/>
+<style>
+.ua-input-row{display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.ua-input{flex:1;min-width:220px;padding:14px 16px;border-radius:var(--v-r-sm);background:var(--v-input);border:1px solid var(--v-border-md);color:var(--v-text);font-size:.9rem;outline:none}
+.ua-input:focus{border-color:var(--v-blue)}
+.ua-ex-btn{padding:4px 12px;border-radius:999px;border:1px solid var(--v-border-md);background:transparent;color:var(--v-muted);font-size:.74rem;cursor:pointer}
+.ua-result{margin-top:16px;display:none}
+.ua-result.show{display:block}
+.ua-badge{font-family:var(--v-font-d);font-weight:700;text-transform:uppercase;padding:5px 14px;border-radius:999px;font-size:.78rem;display:inline-block;margin-bottom:12px}
+.ua-badge--safe{background:rgba(34,197,94,.16);color:var(--v-safe)}
+.ua-badge--scam{background:rgba(239,68,68,.14);color:var(--v-danger)}
+.ua-badge--suspicious{background:rgba(245,158,11,.14);color:var(--v-warn)}
+.ua-flag{font-size:.82rem;color:var(--v-muted);padding-left:20px;position:relative;margin-bottom:8px}
+.ua-flag::before{content:"⚠";position:absolute;left:0;color:var(--v-warn)}
+</style>
+</head><body class="p-body">
+<header class="v-topbar">
+  <a href="/scanner" class="v-topbar__back"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M11 18l-6-6 6-6"/></svg>Scanner</a>
+  <nav class="v-topbar__nav"><a href="/dashboard" class="v-topbar__link">Dashboard</a><a href="/scanner" class="v-topbar__link">Scanner</a><a href="/url-analyzer" class="v-topbar__link is-active">URL Analyzer</a></nav>
+  <div class="v-topbar__right"><a href="/dashboard" class="btn btn--secondary btn--sm">← Dashboard</a></div>
+</header>
+<main class="p-main">
+  <div class="p-header"><h1>🔗 URL Analyzer</h1><p>Paste any link to see exactly where it leads and how risky it is — before you click.</p></div>
+  <div class="p-card">
+    <div class="ua-input-row">
+      <input class="ua-input" id="uaInput" type="url" placeholder="e.g. https://bit.ly/win-prize-now"/>
+      <button class="btn btn--primary" id="uaBtn" style="min-width:120px"><span class="btn__label">Analyze</span><span class="btn__spinner"></span></button>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><span style="font-size:.74rem;color:var(--v-faint)">Try:</span>
+      <button class="ua-ex-btn" data-val="http://gtb-verify-account.tk/login?token=xyz">Fake GTBank</button>
+      <button class="ua-ex-btn" data-val="https://bit.ly/claim-prize-now">Shortened URL</button>
+      <button class="ua-ex-btn" data-val="https://paystack.com">Real Paystack</button>
+    </div>
+    <div class="ua-result" id="uaResult">
+      <span class="ua-badge" id="uaBadge">Safe</span>
+      <p style="font-size:.86rem;margin-bottom:12px" id="uaScore"></p>
+      <div id="uaFlags"></div>
+    </div>
+  </div>
+</main>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const input=document.getElementById('uaInput'), btn=document.getElementById('uaBtn'), result=document.getElementById('uaResult'), badge=document.getElementById('uaBadge'), scoreEl=document.getElementById('uaScore'), flagsEl=document.getElementById('uaFlags');
+  document.querySelectorAll('.ua-ex-btn').forEach(b => b.addEventListener('click', () => { input.value=b.dataset.val; doAnalyze(); }));
+  btn.addEventListener('click', doAnalyze);
+  input.addEventListener('keydown', e => { if(e.key==='Enter') doAnalyze(); });
+  async function doAnalyze() {
+    const url=input.value.trim(); if(!url){input.focus();return;}
+    btn.classList.add('is-loading'); btn.disabled=true; result.classList.remove('show');
+    try {
+      const res=await fetch('/api/url/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url})});
+      const d=await res.json();
+      badge.textContent=d.verdict; badge.className='ua-badge ua-badge--'+d.verdict;
+      scoreEl.textContent=`Risk score: ${d.score}/100`;
+      flagsEl.innerHTML=(d.flags||[]).map(f=>`<p class="ua-flag">${esc(f)}</p>`).join('') || '<p style="font-size:.82rem;color:var(--v-safe)">No risk signals detected.</p>';
+      result.classList.add('show');
+    } catch(e){ scoreEl.textContent='Connection error.'; result.classList.add('show'); }
+    finally { btn.classList.remove('is-loading'); btn.disabled=false; }
+  }
+  function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+});
+</script>
+</body></html>

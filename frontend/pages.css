@@ -1,0 +1,28 @@
+/* Shared styles for About / Contact / Terms / Privacy / Tips / Community / Alerts / Plan / Settings / Admin */
+.p-body { background: var(--v-bg); min-height: 100vh; }
+.p-main { max-width: 820px; margin: 0 auto; padding: 52px 32px 80px; }
+.p-main--wide { max-width: 1000px; }
+.p-header { text-align: center; margin-bottom: 44px; }
+.p-header h1 { font-family: var(--v-font-d); font-size: clamp(1.8rem,3vw,2.4rem); font-weight: 700; letter-spacing: -0.02em; margin-bottom: 12px; }
+.p-header p { font-size: 0.92rem; color: var(--v-muted); max-width: 480px; margin: 0 auto; line-height: 1.6; }
+
+.p-card { padding: 26px; border-radius: var(--v-r-lg); background: var(--v-card); border: 1px solid var(--v-border-md); margin-bottom: 20px; }
+.p-card h2 { font-family: var(--v-font-d); font-size: 1rem; font-weight: 600; margin-bottom: 14px; }
+.p-card p { font-size: 0.86rem; color: var(--v-muted); line-height: 1.7; margin-bottom: 10px; }
+.p-card ul { padding-left: 20px; margin: 10px 0; }
+.p-card li { font-size: 0.86rem; color: var(--v-muted); line-height: 1.7; margin-bottom: 6px; }
+
+.p-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.p-grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+
+.p-founder { display: flex; align-items: center; gap: 20px; padding: 26px; border-radius: var(--v-r-lg); background: linear-gradient(135deg,rgba(109,40,217,.12),var(--v-card)); border: 1px solid rgba(109,40,217,.3); margin-bottom: 24px; }
+.p-founder__avatar { width: 64px; height: 64px; border-radius: 50%; background: var(--v-grad); display: flex; align-items: center; justify-content: center; font-family: var(--v-font-d); font-size: 1.5rem; font-weight: 700; color: #fff; flex-shrink: 0; }
+.p-founder__name { font-family: var(--v-font-d); font-size: 1.1rem; font-weight: 600; margin-bottom: 3px; }
+.p-founder__role { font-size: 0.8rem; color: var(--v-purple-lt); margin-bottom: 8px; }
+.p-founder__bio { font-size: 0.85rem; color: var(--v-muted); line-height: 1.65; }
+
+@media (max-width: 640px) {
+  .p-grid-2, .p-grid-3 { grid-template-columns: 1fr; }
+  .p-main { padding: 36px 16px 60px; }
+  .p-founder { flex-direction: column; text-align: center; }
+}

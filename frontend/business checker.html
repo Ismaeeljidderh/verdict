@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Veridict — Business Checker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="main.css"/><link rel="stylesheet" href="pages.css"/>
+<link rel="manifest" href="/manifest.json"/>
+<style>
+.bc-input-row{display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.bc-input{flex:1;min-width:220px;padding:14px 16px;border-radius:var(--v-r-sm);background:var(--v-input);border:1px solid var(--v-border-md);color:var(--v-text);font-size:.9rem;outline:none}
+.bc-input:focus{border-color:var(--v-purple)}
+.bc-ex-btn{padding:4px 12px;border-radius:999px;border:1px solid var(--v-border-md);background:transparent;color:var(--v-muted);font-size:.74rem;cursor:pointer}
+.bc-ex-btn:hover{border-color:var(--v-purple);color:var(--v-text)}
+.bc-result-header{padding:18px 22px;border-radius:var(--v-r-md);display:flex;align-items:center;gap:14px;margin-top:16px;display:none}
+.bc-result-header.show{display:flex}
+.bc-badge{font-family:var(--v-font-d);font-weight:700;text-transform:uppercase;padding:5px 14px;border-radius:999px;font-size:.78rem}
+.bc-badge--verified{background:rgba(34,197,94,.16);color:var(--v-safe)}
+.bc-badge--impersonation{background:rgba(239,68,68,.14);color:var(--v-danger)}
+.bc-badge--suspicious{background:rgba(245,158,11,.14);color:var(--v-warn)}
+.bc-badge--unknown{background:rgba(255,255,255,.07);color:var(--v-muted)}
+</style>
+</head><body class="p-body">
+<header class="v-topbar">
+  <a href="/scanner" class="v-topbar__back"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M11 18l-6-6 6-6"/></svg>Scanner</a>
+  <nav class="v-topbar__nav"><a href="/dashboard" class="v-topbar__link">Dashboard</a><a href="/scanner" class="v-topbar__link">Scanner</a><a href="/business-checker" class="v-topbar__link is-active">Business Checker</a></nav>
+  <div class="v-topbar__right"><a href="/dashboard" class="btn btn--secondary btn--sm">← Dashboard</a></div>
+</header>
+<main class="p-main">
+  <div class="p-header"><h1>🏢 Verified Business Checker</h1><p>Enter a company name, domain, or URL to check if it's a real business or impersonation.</p></div>
+  <div class="p-card">
+    <div class="bc-input-row">
+      <input class="bc-input" id="bcInput" type="text" placeholder="e.g. gtbank.com or 'GTBank'"/>
+      <button class="btn btn--primary" id="bcCheckBtn" style="min-width:120px"><span class="btn__label">Check</span><span class="btn__spinner"></span></button>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><span style="font-size:.74rem;color:var(--v-faint)">Try:</span>
+      <button class="bc-ex-btn" data-val="gtbank-verify.com">Fake GTBank</button>
+      <button class="bc-ex-btn" data-val="gtbank.com">Real GTBank</button>
+      <button class="bc-ex-btn" data-val="dhl-delivery-ng.com">Fake DHL</button>
+    </div>
+    <div class="bc-result-header" id="bcResult">
+      <span class="bc-badge" id="bcBadge">Unknown</span>
+      <span id="bcMessage" style="font-size:.88rem"></span>
+    </div>
+  </div>
+  <div class="p-card">
+    <h2>What we verify</h2>
+    <div class="p-grid-3">
+      <div><h3 style="font-size:.78rem;color:var(--v-purple-lt);margin-bottom:6px">🇳🇬 Banks</h3><p>GTBank, Access, UBA, Zenith, Kuda, Opay, Palmpay + more</p></div>
+      <div><h3 style="font-size:.78rem;color:var(--v-purple-lt);margin-bottom:6px">🏛 Government</h3><p>CBN, EFCC, NAFDAC, FIRS, NIMC, INEC, NCC</p></div>
+      <div><h3 style="font-size:.78rem;color:var(--v-purple-lt);margin-bottom:6px">📦 Delivery/Tech</h3><p>DHL, FedEx, Google, Apple, Amazon, PayPal, Binance</p></div>
+    </div>
+  </div>
+</main>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const input=document.getElementById('bcInput'), btn=document.getElementById('bcCheckBtn'), result=document.getElementById('bcResult'), badge=document.getElementById('bcBadge'), msg=document.getElementById('bcMessage');
+  document.querySelectorAll('.bc-ex-btn').forEach(b => b.addEventListener('click', () => { input.value=b.dataset.val; doCheck(); }));
+  btn.addEventListener('click', doCheck);
+  input.addEventListener('keydown', e => { if(e.key==='Enter') doCheck(); });
+  async function doCheck() {
+    const q=input.value.trim(); if(!q){input.focus();return;}
+    btn.classList.add('is-loading'); btn.disabled=true; result.classList.remove('show');
+    try {
+      const res=await fetch('/api/business/check',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q})});
+      const d=await res.json();
+      badge.textContent=d.verdict; badge.className='bc-badge bc-badge--'+d.verdict;
+      msg.textContent=d.message;
+      result.classList.add('show');
+    } catch(e){ msg.textContent='Connection error.'; result.classList.add('show'); }
+    finally { btn.classList.remove('is-loading'); btn.disabled=false; }
+  }
+});
+</script>
+</body></html>

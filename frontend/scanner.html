@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Veridict — Scanner</title>
+<meta name="description" content="Scan messages, websites, emails, phone numbers and screenshots for scams instantly."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="main.css"/><link rel="stylesheet" href="scanner.css"/>
+<link rel="manifest" href="/manifest.json"/>
+</head><body class="sc-body">
+<header class="v-topbar">
+  <a href="/dashboard" class="v-topbar__back"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M11 18l-6-6 6-6"/></svg>Dashboard</a>
+  <nav class="v-topbar__nav">
+    <a href="/dashboard" class="v-topbar__link">Dashboard</a>
+    <a href="/scanner" class="v-topbar__link is-active">Scanner</a>
+    <a href="/qr-scanner" class="v-topbar__link">QR</a>
+    <a href="/business-checker" class="v-topbar__link">Business</a>
+    <a href="/url-analyzer" class="v-topbar__link">URL</a>
+  </nav>
+  <div class="v-topbar__right"><div class="v-topbar__user"><span class="v-topbar__avatar" id="topbarAvatar">V</span><span class="v-topbar__name" id="topbarName">Loading…</span></div></div>
+</header>
+<main class="sc-main">
+  <div class="sc-hero">
+    <h1 id="scannerTitle">What do you want to check?</h1>
+    <p id="scannerSub">Paste a message, email, link, or phone number and get a verdict in seconds.</p>
+    <div class="sc-type-bar" id="scannerTypeBar">
+      <button class="sc-type-btn" data-type="message"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 5a2 2 0 012-2h12a2 2 0 012 2v7a2 2 0 01-2 2H9l-4 3v-3H4a2 2 0 01-2-2V5z"/></svg>Message</button>
+      <button class="sc-type-btn" data-type="website"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="10" r="8"/><path d="M2 10h16M10 2a12 12 0 010 16"/></svg>Website</button>
+      <button class="sc-type-btn" data-type="email"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 4h14a1 1 0 011 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1V5a1 1 0 011-1z"/><path d="M2 5l8 6 8-6"/></svg>Email</button>
+      <button class="sc-type-btn" data-type="phone"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 5a1 1 0 011-1h2.5l1 3-1.5 1.5a11 11 0 005.5 5.5L13 12.5l3 1V16a1 1 0 01-1 1A13 13 0 013 5z"/></svg>Phone</button>
+      <button class="sc-type-btn" data-type="screenshot"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="4" width="16" height="12" rx="1"/><circle cx="8" cy="10" r="2"/><path d="M14 8l2 2-2 2"/></svg>Screenshot</button>
+    </div>
+    <p class="sc-hint" id="typeHint">Paste a WhatsApp message, SMS, or any suspicious text below.</p>
+  </div>
+
+  <form id="scanForm" class="sc-card" novalidate>
+    <textarea id="scanInput" class="sc-textarea" placeholder="Paste the suspicious message, link, or email here…" maxlength="5000" required></textarea>
+    <div class="sc-meta-row"><span id="charCount">0 / 5000</span></div>
+    <div class="sc-examples" id="quickExamples"></div>
+    <div class="sc-drop" id="screenshotDrop" hidden>
+      <div style="font-size:2rem;margin-bottom:10px"><svg width="28" height="28" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" style="margin:0 auto 10px;display:block"><rect x="2" y="6" width="16" height="10" rx="1"/><circle cx="10" cy="11" r="3"/><path d="M7 6l1.5-2h3L13 6"/></svg></div>
+      <p style="font-size:.86rem;color:var(--v-muted)">Drop a screenshot here or click to browse</p>
+      <p style="font-size:.74rem;color:var(--v-faint);margin-top:4px">JPG, PNG, WebP — max 5MB</p>
+      <input type="file" id="screenshotFile" accept="image/jpeg,image/png,image/webp"/>
+    </div>
+    <p class="sc-error" id="scanError"></p>
+    <div class="sc-btn-row">
+      <button type="submit" class="btn btn--primary" id="scanBtn" style="flex:1"><span class="btn__label"> Scan now</span><span class="btn__spinner"></span></button>
+      <button type="button" class="btn btn--secondary" id="clearBtn">Clear</button>
+    </div>
+    <div class="sc-upgrade-nudge" id="upgradeNudge">
+      <span style="font-size:.84rem">You've used all your free scans this week.</span>
+      <a href="/plan" class="btn btn--primary btn--sm">Upgrade →</a>
+    </div>
+  </form>
+
+  <div class="p-card" id="bulkScanCard" style="margin-top:20px;position:relative;overflow:hidden">
+  <div style="position:absolute;top:14px;right:14px;font-size:.62rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:3px 10px;border-radius:999px;background:var(--v-grad);color:#fff">PRO</div>
+  <h2 style="font-family:var(--v-font-d);font-size:.95rem;font-weight:600;margin-bottom:6px"> Bulk Scanner</h2>
+  <p style="font-size:.82rem;color:var(--v-muted);margin-bottom:14px">Premium feature — scan up to 20 messages at once, one per line.</p>
+  <textarea id="bulkInput" class="sc-textarea" style="min-height:100px" placeholder="Paste multiple messages, one per line…"></textarea>
+  <div style="display:flex;gap:12px;margin-top:12px">
+    <button class="btn btn--primary" id="bulkScanBtn"><span class="btn__label"> Scan all</span><span class="btn__spinner"></span></button>
+  </div>
+  <p class="sc-error" id="bulkError"></p>
+  <div id="bulkResults" style="margin-top:16px;display:none"></div>
+</div>
+
+<div class="sc-result" id="verdictPanel">
+    <div class="sc-result__header" id="verdictHeader">
+      <span class="sc-verdict-badge" id="verdictBadge">Safe</span>
+      <div class="sc-result__meta"><div class="sc-result__score" id="verdictScore">Risk score: 0/100</div><div class="sc-result__time" id="verdictTime"></div></div>
+    </div>
+    <ul class="sc-flag-list" id="flagList"></ul>
+    <p class="sc-explanation" id="verdictExplanation"></p>
+    <div class="sc-result-actions">
+      <button class="btn btn--secondary btn--sm" id="scanAnotherBtn">Scan another</button>
+      <button class="btn btn--secondary btn--sm" id="copyResultBtn">Copy result</button>
+    </div>
+  </div>
+
+  <div class="sc-history-section">
+    <div class="sc-history-title">Recent scans</div>
+    <ul class="sc-history-list" id="historyList"><li class="sc-history-item" id="historyEmpty" style="justify-content:center;color:var(--v-faint);cursor:default">No scans yet.</li></ul>
+  </div>
+</main>
+<script src="utils.js"></script>
+<script src="scanner.js"></script>
+</body></html>

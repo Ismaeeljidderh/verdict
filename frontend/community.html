@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Veridict — Community Reports</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="main.css"/><link rel="stylesheet" href="pages.css"/>
+<link rel="manifest" href="/manifest.json"/>
+<style>
+.comm-form select,.comm-form textarea{width:100%;padding:12px 14px;border-radius:var(--v-r-sm);background:var(--v-input);border:1px solid var(--v-border-md);color:var(--v-text);font-family:var(--v-font-b);font-size:.88rem;outline:none;margin-bottom:12px}
+.comm-form textarea{min-height:100px;resize:vertical}
+.report-card{padding:18px;border-radius:var(--v-r-md);background:var(--v-card);border:1px solid var(--v-border);display:flex;gap:14px;margin-bottom:12px}
+.report-card__icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
+.report-card__type{font-size:.68rem;font-weight:700;text-transform:uppercase;color:var(--v-purple-lt);margin-bottom:5px}
+.comm-filter-btn{padding:5px 14px;border-radius:999px;border:1px solid var(--v-border-md);background:transparent;color:var(--v-muted);font-size:.76rem;cursor:pointer}
+.comm-filter-btn.is-active{background:rgba(201,147,46,.16);border-color:rgba(201,147,46,.4);color:var(--v-purple-lt)}
+.upvote-btn{padding:3px 10px;border-radius:6px;border:1px solid var(--v-border);background:transparent;color:var(--v-faint);font-size:.72rem;cursor:pointer}
+.upvote-btn:hover{border-color:rgba(201,147,46,.35);color:var(--v-purple-lt)}
+</style>
+</head><body class="p-body">
+<header class="v-topbar">
+  <a href="/dashboard" class="v-topbar__back"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M11 18l-6-6 6-6"/></svg>Dashboard</a>
+  <nav class="v-topbar__nav"><a href="/dashboard" class="v-topbar__link">Dashboard</a><a href="/scanner" class="v-topbar__link">Scanner</a><a href="/community" class="v-topbar__link is-active">Community</a></nav>
+  <div class="v-topbar__right"><a href="/scanner" class="btn btn--primary btn--sm">Scan something →</a></div>
+</header>
+<main class="p-main p-main--wide">
+  <div class="p-header"><h1>👥 Community Reports</h1><p>Share scam patterns you've seen. Help protect everyone else.</p></div>
+  <div class="p-card">
+    <h2>Report a scam you encountered</h2>
+    <div class="comm-form">
+      <select id="scamType">
+        <option value="message">WhatsApp / SMS message</option><option value="email">Email phishing</option><option value="phone">Phone call / robocall</option><option value="website">Fake website</option><option value="investment">Investment / crypto scam</option><option value="job">Fake job offer</option><option value="prize">Prize / lottery scam</option><option value="other">Other</option>
+      </select>
+      <textarea placeholder="Describe what happened (remove personal info)…" id="scamDesc"></textarea>
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+        <button class="btn btn--primary" id="submitReportBtn"><span class="btn__label">Submit report</span><span class="btn__spinner"></span></button>
+        <a href="/scanner" class="btn btn--secondary">Scan this first →</a>
+      </div>
+      <p class="form-status" id="reportStatus" style="margin-top:10px"></p>
+    </div>
+  </div>
+  <div class="p-card" style="margin-bottom:28px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+      <h2 style="font-family:var(--v-font-d);font-size:1rem;font-weight:600">Common Scam Patterns</h2>
+      <span style="font-size:.62rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.07);color:var(--v-muted)">Reference examples</span>
+    </div>
+    <p style="font-size:.8rem;color:var(--v-muted);margin-bottom:16px">These are illustrative examples of well-known scam tactics — not user submissions — shared to help you recognize similar patterns.</p>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="report-card"><div class="report-card__icon" style="background:rgba(201,147,46,.12);border:1px solid rgba(201,147,46,.25)"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 2a6 6 0 00-6 6v3l-2 2v1h16v-1l-2-2V8a6 6 0 00-6-6z"/><path d="M8 15a2 2 0 004 0"/></svg></div><div style="flex:1"><div class="report-card__type">Advance-fee / Inheritance scam</div><p style="font-size:.84rem;color:var(--v-muted)">Messages claiming you're the beneficiary of unclaimed funds or an inheritance, asking for a "processing fee" before releasing a large sum. Real institutions never ask you to pay to receive money.</p></div></div>
+      <div class="report-card"><div class="report-card__icon" style="background:rgba(201,147,46,.12);border:1px solid rgba(201,147,46,.25)"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="7" width="16" height="11" rx="1"/><path d="M6 7V5a4 4 0 018 0v2"/></svg></div><div style="flex:1"><div class="report-card__type">Fake delivery / customs fee</div><p style="font-size:.84rem;color:var(--v-muted)">A text or email claims your package is held at customs and needs a small fee to release. Legitimate couriers bill through official invoices, not surprise payment links.</p></div></div>
+      <div class="report-card"><div class="report-card__icon" style="background:rgba(201,147,46,.12);border:1px solid rgba(201,147,46,.25)"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 5a2 2 0 012-2h12a2 2 0 012 2v7a2 2 0 01-2 2H9l-4 3v-3H4a2 2 0 01-2-2V5z"/></svg></div><div style="flex:1"><div class="report-card__type">Work-from-home job scam</div><p style="font-size:.84rem;color:var(--v-muted)">A job offer promising high weekly pay for remote work, requiring a "registration" or "training" deposit up front. Real employers never charge you to start working.</p></div></div>
+      <div class="report-card"><div class="report-card__icon" style="background:rgba(201,147,46,.12);border:1px solid rgba(201,147,46,.25)"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="10" r="8"/><path d="M2 10h16M10 2a12 12 0 010 16"/></svg></div><div style="flex:1"><div class="report-card__type">Brand/domain impersonation</div><p style="font-size:.84rem;color:var(--v-muted)">Emails from misspelled lookalike domains (e.g. "microsaft.com" instead of "microsoft.com") pretending to be a trusted company's support team.</p></div></div>
+    </div>
+  </div>
+
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+    <h2 style="font-family:var(--v-font-d);font-size:1rem;font-weight:600">Community Reports</h2>
+    <div style="display:flex;gap:6px"><button class="comm-filter-btn is-active" data-filter="all">All</button><button class="comm-filter-btn" data-filter="scam">Scams</button></div>
+  </div>
+  <div id="reportsContainer"><p style="text-align:center;color:var(--v-faint);padding:20px">Loading…</p></div>
+</main>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  let csrfToken='', currentFilter='all';
+  const ICONS={message:'💬',email:'📧',phone:'📞',website:'🌐',investment:'💰',job:'💼',prize:'🏆',other:'⚠️'};
+  const LABELS={message:'WhatsApp/SMS',email:'Email phishing',phone:'Phone call',website:'Fake website',investment:'Investment scam',job:'Fake job',prize:'Lottery/prize',other:'Other'};
+  try{const r=await fetch('/api/csrf-token',{credentials:'same-origin'});csrfToken=(await r.json()).csrf_token||'';}catch(e){}
+
+  async function loadReports() {
+    try {
+      const r=await fetch('/api/scan/community/reports?limit=20',{credentials:'same-origin'});
+      const d=await r.json(); let reports=d.reports||[];
+      if(currentFilter!=='all') reports=reports.filter(r=>r.verdict===currentFilter);
+      const container=document.getElementById('reportsContainer'); container.innerHTML='';
+      if(!reports.length){container.innerHTML='<p style="text-align:center;color:var(--v-faint);padding:20px">No reports yet — be the first!</p>';return;}
+      reports.forEach(rep => container.appendChild(buildCard(rep)));
+    } catch(e){}
+  }
+  function buildCard(rep) {
+    const t=rep.scam_type||'other'; const div=document.createElement('div'); div.className='report-card';
+    div.innerHTML=`<div class="report-card__icon" style="background:rgba(201,147,46,.12);border:1px solid rgba(201,147,46,.25)">${ICONS[t]||'⚠️'}</div><div style="flex:1"><div class="report-card__type">${LABELS[t]||t}</div><p style="font-size:.84rem;color:var(--v-muted);margin-bottom:8px">${esc(rep.description)}</p><button class="upvote-btn" data-id="${rep.id}">👍 <span class="uv">${rep.upvotes||0}</span></button></div>`;
+    div.querySelector('.upvote-btn').addEventListener('click', async function(){
+      this.disabled=true;
+      try{const r=await fetch(`/api/scan/community/reports/${rep.id}/upvote`,{method:'POST',credentials:'same-origin',headers:{'X-CSRFToken':csrfToken}});if(r.ok){const d=await r.json();this.querySelector('.uv').textContent=d.upvotes;}}catch(e){}
+      setTimeout(()=>{this.disabled=false;},2000);
+    });
+    return div;
+  }
+  document.querySelectorAll('.comm-filter-btn').forEach(btn => btn.addEventListener('click', () => { currentFilter=btn.dataset.filter; document.querySelectorAll('.comm-filter-btn').forEach(b=>b.classList.remove('is-active')); btn.classList.add('is-active'); loadReports(); }));
+  document.getElementById('submitReportBtn').addEventListener('click', async () => {
+    const type=document.getElementById('scamType').value, text=document.getElementById('scamDesc').value.trim();
+    const status=document.getElementById('reportStatus'), btn=document.getElementById('submitReportBtn');
+    if(text.length<20){status.textContent='Describe the scam in at least 20 characters.';status.className='form-status is-error';return;}
+    btn.classList.add('is-loading'); btn.disabled=true;
+    try{
+      const r=await fetch('/api/scan/community/reports',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json','X-CSRFToken':csrfToken},body:JSON.stringify({scam_type:type,description:text})});
+      const d=await r.json();
+      if(r.ok){status.textContent=d.message;status.className='form-status is-success';document.getElementById('scamDesc').value='';loadReports();}
+      else{status.textContent=d.message||'Could not submit.';status.className='form-status is-error';}
+    }catch(e){status.textContent='Connection error.';status.className='form-status is-error';}
+    finally{btn.classList.remove('is-loading');btn.disabled=false;}
+  });
+  function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+  loadReports();
+});
+</script>
+</body></html>
