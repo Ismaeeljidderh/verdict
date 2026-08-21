@@ -196,6 +196,16 @@ NARRATIVE_PATTERNS = [
      "references CAC (Corporate Affairs Commission) registration status — used in scams targeting small business owners"),
     (r"\b(refund|reversal)\b.{0,40}\b(pending|approved|process)\b.{0,40}\b(confirm|verify|click)\b", 20,
      "claims a refund or reversal is pending and asks you to confirm or click a link — a common fake-refund phishing pattern"),
+    (r"\bjamb\b.{0,40}\b(result|admission|change\s+of\s+(course|institution)|verify|upgrade|caps)\b", 26,
+     "references JAMB result, admission, or CAPS changes — a common scam targeting prospective Nigerian university students"),
+    (r"\b(nysc|orientation\s+camp)\b.{0,40}\b(mobilization|posting|relocat|verify|payment|clearance)\b", 26,
+     "references NYSC mobilization, posting, or clearance — used to target corps members with fake payment or relocation demands"),
+    (r"\b(efcc|police|dss|ican|customs\s+officer)\b.{0,50}\b(arrest|warrant|investigation|case\s+file|settle|bail)\b", 34,
+     "impersonates a Nigerian law-enforcement or government agency (EFCC, Police, DSS) threatening arrest — a well-known extortion scam pattern"),
+    (r"\b(court\s+summons|arrest\s+warrant|criminal\s+case)\b.{0,50}\b(pending|issued|against\s+you)\b", 30,
+     "claims a court summons or arrest warrant has been issued against you — a fear-based extortion tactic, not how real legal notices are delivered"),
+    (r"\b(scholarship|grant)\b.{0,40}\b(awarded|selected|processing\s+fee|release\s+fee)\b", 24,
+     "claims you've been awarded a scholarship or grant but requires a processing fee first — legitimate scholarships never charge a release fee"),
 ]
 
 # ──────────────────────────────────────────────────────────────
@@ -246,14 +256,37 @@ def _plain_language_summary(hits, score, verdict):
     return "\n".join(lines)
 
 
+def _risk_level(score):
+    """
+    Four-tier risk rating layered on top of the existing 3-tier verdict.
+    Verdict (safe/suspicious/scam) still drives badge color for backward
+    compatibility; risk_level gives a more granular read for the UI.
+      0-24   -> Low
+      25-54  -> Medium
+      55-79  -> High
+      80-100 -> Critical
+    """
+    if score >= 80:
+        return "Critical"
+    elif score >= 55:
+        return "High"
+    elif score >= 25:
+        return "Medium"
+    else:
+        return "Low"
+
+
 def analyze_content(text):
     """
     Main entry point. Returns:
     {
         "verdict": "scam" | "suspicious" | "safe",
+        "risk_level": "Low" | "Medium" | "High" | "Critical",
         "score": 0-100,
         "flags": [short labels for UI badges],
+        "highlights": [exact snippets from the pasted text worth highlighting],
         "explanation": "plain language paragraph citing actual matched text",
+        "recommended_actions": [...],
     }
     """
     lowered = text.lower()
@@ -350,10 +383,22 @@ def analyze_content(text):
     explanation = _plain_language_summary(unique_hits, score, verdict)
     recommended_actions = _recommended_actions(unique_hits, verdict)
 
+    # De-duplicated list of the exact snippets pulled from the pasted
+    # text, ordered by weight, so the UI can highlight them inline.
+    seen_quotes = set()
+    highlights = []
+    for h in unique_hits:
+        q = h.get("quote")
+        if q and q.lower() not in seen_quotes:
+            seen_quotes.add(q.lower())
+            highlights.append(q)
+
     return {
         "verdict": verdict,
+        "risk_level": _risk_level(score),
         "score": score,
         "flags": flags,
+        "highlights": highlights,
         "explanation": explanation,
         "recommended_actions": recommended_actions,
     }

@@ -1,13 +1,166 @@
-import json, re
+import json, re, os
 from datetime import datetime, timedelta
 from flask import Blueprint, request, jsonify, session
 from auth import login_required
 from extensions import db, limiter
 from models import User, ScanHistory, CommunityReport
-from scam_engine import analyze_content
+from scam_engine import analyze_content, _risk_level
+from url_analyzer import _analyze_url
 
 scan_bp = Blueprint("scan", __name__, url_prefix="/api")
 FREE_WEEKLY_SCAN_LIMIT = 5
+ALLOWED_IMAGE_TYPES = {"image/png", "image/jpeg", "image/jpg", "image/webp"}
+MAX_IMAGE_BYTES = 5 * 1024 * 1024  # 5MB, matches the frontend's own limit
+
+# Nigerian mobile network prefixes — used only to label which network a
+# scanned number is on. Informational context, not a risk signal by itself.
+NG_NETWORK_PREFIXES = {
+    "MTN":     ("0803","0806","0703","0706","0813","0816","0810","0814","0903","0906","0913","0916","0916"),
+    "Glo":     ("0805","0807","0705","0815","0811","0905","0915"),
+    "Airtel":  ("0802","0808","0708","0812","0701","0902","0901","0904","0907","0912"),
+    "9mobile": ("0809","0817","0818","0908","0909"),
+}
+
+
+def _augment_for_type(scan_type, content, result):
+    """
+    Layers scanner-type-specific checks on top of the generic text
+    analysis, so each scanner actually behaves differently instead of
+    running the exact same content check regardless of what tab the
+    user picked.
+    """
+    if scan_type == "website":
+        url_match = re.search(r"https?://\S+|www\.\S+|\b[a-z0-9-]+\.[a-z]{2,}\S*", content, re.IGNORECASE)
+        target = url_match.group(0) if url_match else content
+        url_result = _analyze_url(target)
+        if url_result and url_result.get("flags"):
+            result["flags"] = list(dict.fromkeys(url_result["flags"] + result["flags"]))[:10]
+            result["score"] = max(result["score"], url_result.get("score", 0))
+            result["risk_level"] = _risk_level(result["score"])
+            result["verdict"] = "scam" if result["score"] >= 55 else ("suspicious" if result["score"] >= 25 else "safe")
+            result["url_details"] = url_result.get("details", {})
+
+    elif scan_type == "phone":
+        digits = re.sub(r"\D", "", content)
+        local = digits[-10:] if len(digits) >= 10 else digits
+        if local:
+            prior = (CommunityReport.query
+                     .filter(CommunityReport.description.contains(local))
+                     .order_by(CommunityReport.reported_at.desc())
+                     .limit(5).all())
+            if prior:
+                result["flags"] = [f"Reported {len(prior)}x by the community as a possible scam number"] + result["flags"]
+                result["score"] = min(100, result["score"] + 25)
+                result["risk_level"] = _risk_level(result["score"])
+                result["verdict"] = "scam" if result["score"] >= 55 else ("suspicious" if result["score"] >= 25 else "safe")
+                result["community_reports"] = [r.to_dict() for r in prior]
+
+            local_10 = ("0" + local[-9:]) if len(local) >= 9 else local
+            prefix = local_10[:4]
+            network = next((n for n, prefixes in NG_NETWORK_PREFIXES.items() if prefix in prefixes), None)
+            if network:
+                result["network"] = network
+
+    return result
+
+
+def _extract_text_from_image(file_storage):
+    """
+    Sends the uploaded image to OCR.space (a free hosted OCR API) and
+    returns the extracted text. No system-level OCR binary is required,
+    which matters because Render's free-tier Python runtime can't
+    install packages like Tesseract without a custom Docker build.
+
+    Set OCR_SPACE_API_KEY as an environment variable in Render for
+    production use. Falls back to OCR.space's shared demo key
+    ("helloworld") if unset, which works but is rate-limited across
+    everyone using it — fine for testing, not for real traffic.
+    """
+    import requests
+    api_key = os.environ.get("OCR_SPACE_API_KEY", "helloworld")
+    file_storage.stream.seek(0)
+    try:
+        resp = requests.post(
+            "https://api.ocr.space/parse/image",
+            files={"file": (file_storage.filename, file_storage.stream, file_storage.mimetype)},
+            data={"apikey": api_key, "language": "eng", "OCREngine": 2, "scale": True},
+            timeout=25,
+        )
+        data = resp.json()
+    except Exception:
+        return None, "Could not reach the image-reading service. Try again in a moment."
+
+    if data.get("IsErroredOnProcessing"):
+        msg = data.get("ErrorMessage") or ["Could not read text from this image."]
+        return None, (msg[0] if isinstance(msg, list) else str(msg))
+
+    parsed = data.get("ParsedResults") or []
+    if not parsed:
+        return None, "No text could be found in this image."
+
+    text = "\n".join(p.get("ParsedText", "") for p in parsed).strip()
+    if not text:
+        return None, "No readable text was found in this image. Try a clearer screenshot, or paste the text instead."
+    return text, None
+
+
+@scan_bp.route("/scan/screenshot", methods=["POST"])
+@login_required
+@limiter.limit("15 per minute")
+def scan_screenshot():
+    """
+    Real screenshot scanning: extracts the actual text from the
+    uploaded image via OCR, then runs it through the same detection
+    engine as every other scan type — instead of just recording the
+    filename, which is what this endpoint used to not even do (the
+    frontend never uploaded the file at all).
+    """
+    user = User.query.get(session["user_id"])
+    if not user: return jsonify({"message": "Session expired."}), 401
+    if not user.is_premium:
+        week_ago = datetime.utcnow() - timedelta(days=7)
+        weekly = ScanHistory.query.filter_by(user_id=user.id).filter(ScanHistory.scanned_at >= week_ago).count()
+        limit  = FREE_WEEKLY_SCAN_LIMIT + (user.rewarded_scans or 0)
+        if weekly >= limit:
+            return jsonify({"message": f"You've used all {limit} scans this week. Watch an ad for 3 more, or upgrade.","upgrade_required": True}), 402
+
+    if "file" not in request.files:
+        return jsonify({"message": "No image file received."}), 400
+    file = request.files["file"]
+    if not file or not file.filename:
+        return jsonify({"message": "No image file received."}), 400
+    if file.mimetype not in ALLOWED_IMAGE_TYPES:
+        return jsonify({"message": "Unsupported image type — use PNG, JPG, or WEBP."}), 400
+
+    file.stream.seek(0, os.SEEK_END)
+    size = file.stream.tell()
+    file.stream.seek(0)
+    if size > MAX_IMAGE_BYTES:
+        return jsonify({"message": "File too large — max 5MB."}), 400
+
+    extracted_text, error = _extract_text_from_image(file)
+    if error:
+        return jsonify({"message": error, "ocr_failed": True}), 422
+    if len(extracted_text) > 5000:
+        extracted_text = extracted_text[:5000]
+
+    result = analyze_content(extracted_text)
+    entry = ScanHistory(user_id=user.id, scan_type="screenshot",
+        preview=extracted_text[:90] + ("…" if len(extracted_text) > 90 else ""),
+        verdict=result["verdict"], score=result["score"], flags=json.dumps(result["flags"]))
+    db.session.add(entry); db.session.commit()
+
+    response = entry.to_dict()
+    response["extracted_text"] = extracted_text
+    response["recommended_actions"] = result["recommended_actions"]
+    response["risk_level"] = result["risk_level"]
+    response["highlights"] = result.get("highlights", [])
+    if user.is_premium:
+        response["explanation"] = result["explanation"]
+    else:
+        response["explanation"] = None
+        response["explanation_locked"] = True
+    return jsonify(response), 200
 
 
 @scan_bp.route("/scan", methods=["POST"])
@@ -31,6 +184,7 @@ def scan_content():
             return jsonify({"message": f"You've used all {limit} scans this week. Watch an ad for 3 more, or upgrade.","upgrade_required": True}), 402
 
     result = analyze_content(content)
+    result = _augment_for_type(scan_type, content, result)
     entry = ScanHistory(user_id=user.id, scan_type=scan_type,
         preview=content[:90] + ("…" if len(content) > 90 else ""),
         verdict=result["verdict"], score=result["score"], flags=json.dumps(result["flags"]))
@@ -38,6 +192,11 @@ def scan_content():
 
     response = entry.to_dict()
     response["recommended_actions"] = result["recommended_actions"]
+    response["risk_level"] = result["risk_level"]
+    response["highlights"] = result.get("highlights", [])
+    if result.get("url_details"): response["url_details"] = result["url_details"]
+    if result.get("network"): response["network"] = result["network"]
+    if result.get("community_reports"): response["community_reports"] = result["community_reports"]
     if user.is_premium:
         response["explanation"] = result["explanation"]
     else:
@@ -68,8 +227,18 @@ def scan_stats():
     week_ago = datetime.utcnow() - timedelta(days=7)
     weekly_used = ScanHistory.query.filter_by(user_id=user_id).filter(ScanHistory.scanned_at >= week_ago).count()
     remaining = None if is_premium else max(0, FREE_WEEKLY_SCAN_LIMIT + rewarded - weekly_used)
+
+    # Real risk-level breakdown, computed from each threat's actual stored
+    # score — not a fixed 50/33/17 formula guessed off the total count.
+    threat_scores = [r.score for r in ScanHistory.query.filter_by(user_id=user_id)
+                      .filter(ScanHistory.verdict.in_(["scam", "suspicious"])).all()]
+    risk_breakdown = {"critical": 0, "high": 0, "medium": 0, "low": 0}
+    for s in threat_scores:
+        risk_breakdown[_risk_level(s).lower()] += 1
+
     return jsonify({"total_scans": total, "threats_blocked": threats, "safe_scans": safe,
-        "free_scans_remaining": remaining, "rewarded_scans": rewarded, "is_premium": is_premium}), 200
+        "free_scans_remaining": remaining, "rewarded_scans": rewarded, "is_premium": is_premium,
+        "risk_breakdown": risk_breakdown}), 200
 
 
 @scan_bp.route("/scan/export", methods=["GET"])
@@ -111,8 +280,9 @@ def demo_scan():
     if not content: return jsonify({"message": "Paste something to scan."}), 400
     if len(content) > 1000: return jsonify({"message": "Demo limited to 1000 characters."}), 400
     result = analyze_content(content)
-    return jsonify({"verdict": result["verdict"], "score": result["score"],
-        "flags": result["flags"][:3], "explanation": result["explanation"], "demo": True}), 200
+    return jsonify({"verdict": result["verdict"], "risk_level": result["risk_level"], "score": result["score"],
+        "flags": result["flags"][:3], "explanation": result["explanation"],
+        "highlights": result.get("highlights", []), "demo": True}), 200
 
 
 @scan_bp.route("/scan/qr", methods=["POST"])
@@ -151,6 +321,8 @@ def scan_qr():
 
     response = entry.to_dict()
     response["explanation"] = text_result["explanation"]
+    response["risk_level"] = _risk_level(combined_score)
+    response["highlights"] = text_result.get("highlights", [])
     if url_result: response["url_details"] = url_result["details"]
     return jsonify(response), 200
 

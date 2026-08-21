@@ -15,21 +15,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     const r = await fetch('/api/csrf-token', { credentials: 'same-origin' });
     csrfToken = (await r.json()).csrf_token || '';
     if (window.VeridictAd) window.VeridictAd.init(csrfToken);
-  } catch(e) {}
+  } catch (e) { }
 
   /* ── Load user + stats in parallel ── */
   try {
     const [meRes, statsRes, histRes] = await Promise.all([
-      fetch('/api/me',           { credentials: 'same-origin' }),
-      fetch('/api/scan/stats',   { credentials: 'same-origin' }),
+      fetch('/api/me', { credentials: 'same-origin' }),
+      fetch('/api/scan/stats', { credentials: 'same-origin' }),
       fetch('/api/scan/history?limit=4', { credentials: 'same-origin' }),
     ]);
 
     if (meRes.status === 401) { window.location.href = '/login'; return; }
 
-    const me    = await meRes.json();
+    const me = await meRes.json();
     const stats = statsRes.ok ? await statsRes.json() : {};
-    const hist  = histRes.ok  ? await histRes.json()  : {};
+    const hist = histRes.ok ? await histRes.json() : {};
 
     renderUser(me);
     renderStats(stats);
@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       setTimeout(() => window.VeriditOnboarding.show(firstName), 900);
     }
 
-  } catch(e) {
+  } catch (e) {
     console.error('Dashboard load error:', e);
   }
 
@@ -52,13 +52,13 @@ document.addEventListener('DOMContentLoaded', async () => {
      RENDER USER
   ────────────────────────────────────────────── */
   function renderUser(me) {
-    const name    = me.full_name || me.username || 'User';
+    const name = me.full_name || me.username || 'User';
     const initial = name.charAt(0).toUpperCase();
-    const first   = name.split(' ')[0];
+    const first = name.split(' ')[0];
 
-    document.getElementById('dbGreeting').textContent    = `Welcome back, ${first}! 👋`;
-    document.getElementById('topbarAvatar').textContent  = initial;
-    document.getElementById('topbarName').textContent    = name;
+    document.getElementById('dbGreeting').textContent = `Welcome back, ${first}! 👋`;
+    document.getElementById('topbarAvatar').textContent = initial;
+    document.getElementById('topbarName').textContent = name;
 
     const badge = document.getElementById('topbarBadge');
     if (me.is_premium) {
@@ -74,27 +74,27 @@ document.addEventListener('DOMContentLoaded', async () => {
      RENDER STAT CARDS
   ────────────────────────────────────────────── */
   function renderStats(stats) {
-    const total     = stats.total_scans          || 0;
-    const threats   = stats.threats_blocked      || 0;
+    const total = stats.total_scans || 0;
+    const threats = stats.threats_blocked || 0;
     const remaining = stats.free_scans_remaining;
     const isPremium = stats.is_premium;
 
     /* Total scans */
-    document.getElementById('statTotal').textContent    = total.toLocaleString();
+    document.getElementById('statTotal').textContent = total.toLocaleString();
     document.getElementById('statTotalSub').textContent = `↑ ${total} all time`;
 
     /* Threats */
-    document.getElementById('statThreats').textContent    = threats.toLocaleString();
+    document.getElementById('statThreats').textContent = threats.toLocaleString();
     document.getElementById('statThreatsSub').textContent = `${threats} blocked`;
 
     /* Scans left + donut ring */
     if (isPremium) {
-      document.getElementById('statLeft').textContent   = '∞';
+      document.getElementById('statLeft').textContent = '∞';
       document.getElementById('statLeftSub').textContent = 'Unlimited — Premium';
       setDonut(100);
     } else {
       const used = Math.max(0, 10 - (remaining || 0));
-      document.getElementById('statLeft').textContent    = `${remaining ?? 0} / 10`;
+      document.getElementById('statLeft').textContent = `${remaining ?? 0} / 10`;
       document.getElementById('statLeftSub').textContent = 'Resets every week';
       setDonut(((remaining ?? 0) / 10) * 100);
 
@@ -105,7 +105,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     /* Account plan card */
     document.getElementById('statPlanName').textContent = isPremium ? 'Premium Plan' : 'Free Plan';
-    document.getElementById('statPlanSub').textContent  = isPremium ? 'Unlimited scans active ✓' : 'Upgrade for unlimited scans';
+    document.getElementById('statPlanSub').textContent = isPremium ? 'Unlimited scans active ✓' : 'Upgrade for unlimited scans';
     if (isPremium) {
       document.getElementById('statPlanName').style.color = '#22c55e';
     }
@@ -114,9 +114,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   function setDonut(pct) {
     const ring = document.getElementById('donutRing');
     if (!ring) return;
-    const circ  = 2 * Math.PI * 22; // r=22
-    const dash  = (pct / 100) * circ;
-    ring.style.strokeDasharray  = `${dash} ${circ}`;
+    const circ = 2 * Math.PI * 22; // r=22
+    const dash = (pct / 100) * circ;
+    ring.style.strokeDasharray = `${dash} ${circ}`;
     ring.style.strokeDashoffset = '0';
   }
 
@@ -124,41 +124,45 @@ document.addEventListener('DOMContentLoaded', async () => {
      RENDER RISK DONUT CHART
   ────────────────────────────────────────────── */
   function renderRisk(stats) {
-    const total   = stats.threats_blocked || 0;
-    const high    = Math.round(total * 0.5);
-    const medium  = Math.round(total * 0.33);
-    const low     = Math.max(0, total - high - medium);
-    const circ    = 2 * Math.PI * 38; // r=38, circumference ≈ 238.76
+    const total = stats.threats_blocked || 0;
+    const rb = stats.risk_breakdown || {};
+    // The donut has 3 slices; fold Critical into the High slice since it's
+    // a High-and-above severity band visually. These are now real counts
+    // from each scan's actual stored score — not a fixed formula.
+    const high = (rb.critical || 0) + (rb.high || 0);
+    const medium = rb.medium || 0;
+    const low = rb.low || 0;
+    const circ = 2 * Math.PI * 38; // r=38, circumference ≈ 238.76
 
-    document.getElementById('riskTotal').textContent     = total;
-    document.getElementById('riskHighCount').textContent = `${high} (${total ? Math.round(high/total*100) : 0}%)`;
-    document.getElementById('riskMedCount').textContent  = `${medium} (${total ? Math.round(medium/total*100) : 0}%)`;
-    document.getElementById('riskLowCount').textContent  = `${low} (${total ? Math.round(low/total*100) : 0}%)`;
+    document.getElementById('riskTotal').textContent = total;
+    document.getElementById('riskHighCount').textContent = `${high} (${total ? Math.round(high / total * 100) : 0}%)`;
+    document.getElementById('riskMedCount').textContent = `${medium} (${total ? Math.round(medium / total * 100) : 0}%)`;
+    document.getElementById('riskLowCount').textContent = `${low} (${total ? Math.round(low / total * 100) : 0}%)`;
 
     if (total === 0) return;
 
-    const highPct   = high   / total;
-    const medPct    = medium / total;
-    const lowPct    = low    / total;
+    const highPct = high / total;
+    const medPct = medium / total;
+    const lowPct = low / total;
 
-    const highDash  = highPct  * circ;
-    const medDash   = medPct   * circ;
-    const lowDash   = lowPct   * circ;
+    const highDash = highPct * circ;
+    const medDash = medPct * circ;
+    const lowDash = lowPct * circ;
 
     const highOffset = 0;
-    const medOffset  = -(highDash);
-    const lowOffset  = -(highDash + medDash);
+    const medOffset = -(highDash);
+    const lowOffset = -(highDash + medDash);
 
     const rHigh = document.getElementById('riskHigh');
-    const rMed  = document.getElementById('riskMed');
-    const rLow  = document.getElementById('riskLow');
+    const rMed = document.getElementById('riskMed');
+    const rLow = document.getElementById('riskLow');
 
-    rHigh.style.strokeDasharray  = `${highDash} ${circ - highDash}`;
+    rHigh.style.strokeDasharray = `${highDash} ${circ - highDash}`;
     rHigh.style.strokeDashoffset = String(highOffset);
-    rMed.style.strokeDasharray   = `${medDash} ${circ - medDash}`;
-    rMed.style.strokeDashoffset  = String(medOffset);
-    rLow.style.strokeDasharray   = `${lowDash} ${circ - lowDash}`;
-    rLow.style.strokeDashoffset  = String(lowOffset);
+    rMed.style.strokeDasharray = `${medDash} ${circ - medDash}`;
+    rMed.style.strokeDashoffset = String(medOffset);
+    rLow.style.strokeDasharray = `${lowDash} ${circ - lowDash}`;
+    rLow.style.strokeDashoffset = String(lowOffset);
   }
 
   /* ──────────────────────────────────────────────
@@ -174,16 +178,16 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
-    const TYPE_ICONS = { message:'💬', website:'🌐', email:'📧', phone:'📞', screenshot:'📷', qr:'🔲' };
+    const TYPE_ICONS = { message: '💬', website: '🌐', email: '📧', phone: '📞', screenshot: '📷', qr: '🔲' };
     const STATUS = {
-      scam:       { text: 'Scam detected',     cls: 'db-alert-item__status--scam' },
+      scam: { text: 'Scam detected', cls: 'db-alert-item__status--scam' },
       suspicious: { text: 'Potentially Unsafe', cls: 'db-alert-item__status--warn' },
     };
 
     el.innerHTML = threats.map(h => {
       const icon = TYPE_ICONS[h.type] || '⚠️';
-      const s    = STATUS[h.verdict] || STATUS.scam;
-      const ago  = timeAgo(h.scanned_at);
+      const s = STATUS[h.verdict] || STATUS.scam;
+      const ago = timeAgo(h.scanned_at);
       return `
         <div class="db-alert-item">
           <div class="db-alert-item__icon">${icon}</div>
@@ -208,12 +212,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   function renderPlanCard(me, stats) {
     const isPremium = me.is_premium;
     const remaining = stats.free_scans_remaining ?? 10;
-    const used      = Math.max(0, 10 - remaining);
-    const pct       = isPremium ? 100 : (remaining / 10) * 100;
+    const used = Math.max(0, 10 - remaining);
+    const pct = isPremium ? 100 : (remaining / 10) * 100;
 
     document.getElementById('planCardName').textContent = isPremium ? 'Premium Plan ✓' : 'Free Plan';
     document.getElementById('planCardScans').textContent = isPremium ? '∞ / ∞' : `${remaining} / 10`;
-    document.getElementById('planCardBar').style.width   = pct + '%';
+    document.getElementById('planCardBar').style.width = pct + '%';
 
     if (isPremium) {
       document.getElementById('planCardBar').style.background = 'linear-gradient(90deg,#22c55e,#4ade80)';
@@ -233,7 +237,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     btn.addEventListener('click', async () => {
       btn.textContent = 'Sending…'; btn.disabled = true;
       try {
-        await fetch('/api/resend-verification', { method:'POST', credentials:'same-origin', headers:{'X-CSRFToken':csrf} });
+        await fetch('/api/resend-verification', { method: 'POST', credentials: 'same-origin', headers: { 'X-CSRFToken': csrf } });
         btn.textContent = '✓ Sent!';
         setTimeout(() => { btn.textContent = 'Resend email'; btn.disabled = false; }, 3000);
       } catch { btn.textContent = 'Error'; btn.disabled = false; }
@@ -264,7 +268,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   ────────────────────────────────────────────── */
   document.getElementById('logoutBtn')?.addEventListener('click', async () => {
     try {
-      await fetch('/api/logout', { method:'POST', credentials:'same-origin', headers:{'X-CSRFToken':csrfToken} });
+      await fetch('/api/logout', { method: 'POST', credentials: 'same-origin', headers: { 'X-CSRFToken': csrfToken } });
     } finally {
       window.location.href = '/';
     }
@@ -276,7 +280,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   function timeAgo(iso) {
     try {
       const m = Math.floor((Date.now() - new Date(iso)) / 60000);
-      if (m < 1)  return 'just now';
+      if (m < 1) return 'just now';
       if (m < 60) return m + 'm ago';
       const h = Math.floor(m / 60);
       if (h < 24) return h + 'h ago';

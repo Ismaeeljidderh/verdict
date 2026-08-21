@@ -1,12 +1,12 @@
 document.addEventListener('DOMContentLoaded', () => {
   const scanForm=document.getElementById('scanForm'), scanInput=document.getElementById('scanInput'), scanBtn=document.getElementById('scanBtn'), clearBtn=document.getElementById('clearBtn'), charCount=document.getElementById('charCount'), scanError=document.getElementById('scanError');
   const screenshotDrop=document.getElementById('screenshotDrop'), screenshotFile=document.getElementById('screenshotFile');
-  const verdictPanel=document.getElementById('verdictPanel'), verdictBadge=document.getElementById('verdictBadge'), verdictScore=document.getElementById('verdictScore'), verdictTime=document.getElementById('verdictTime'), flagList=document.getElementById('flagList'), verdictExp=document.getElementById('verdictExplanation');
+  const verdictPanel=document.getElementById('verdictPanel'), verdictBadge=document.getElementById('verdictBadge'), riskLevelBadge=document.getElementById('riskLevelBadge'), verdictScore=document.getElementById('verdictScore'), verdictTime=document.getElementById('verdictTime'), flagList=document.getElementById('flagList'), verdictExp=document.getElementById('verdictExplanation'), highlightBox=document.getElementById('highlightBox');
   const scanAnotherBtn=document.getElementById('scanAnotherBtn'), copyResultBtn=document.getElementById('copyResultBtn');
   const historyList=document.getElementById('historyList'), historyEmpty=document.getElementById('historyEmpty'), upgradeNudge=document.getElementById('upgradeNudge');
   const topbarAvatar=document.getElementById('topbarAvatar'), topbarName=document.getElementById('topbarName'), typeHint=document.getElementById('typeHint'), scannerTitle=document.getElementById('scannerTitle'), scannerSub=document.getElementById('scannerSub');
 
-  let csrfToken='', lastResult=null, activeType='message';
+  let csrfToken='', lastResult=null, activeType='message', lastScannedText='', selectedScreenshotFile=null;
 
   const TYPES = {
     message: { label:'Message', title:'Scan a message', sub:"Paste a WhatsApp, SMS, or any suspicious text below.", hint:'Paste a WhatsApp message, SMS, or any suspicious text below.', placeholder:'Paste the suspicious message here…', mode:'text', examples:[{label:'Lottery scam',text:'Congratulations! You have won $5,000,000! Click here to claim: http://bit.ly/claim-now. Act NOW!'},{label:'Safe message',text:'Hey, are we still on for lunch tomorrow at 1pm?'}]},
@@ -31,13 +31,13 @@ document.addEventListener('DOMContentLoaded', () => {
     screenshotDrop.hidden = cfg.mode!=='screenshot';
     const ex=document.getElementById('quickExamples'); ex.innerHTML='';
     cfg.examples.forEach(e => { const b=document.createElement('button'); b.type='button'; b.className='sc-ex-btn'; b.textContent=e.label; b.addEventListener('click',()=>{scanInput.value=e.text;scanInput.dispatchEvent(new Event('input'));}); ex.appendChild(b); });
-    verdictPanel.classList.remove('is-visible'); clearError();
+    verdictPanel.classList.remove('is-visible'); clearError(); selectedScreenshotFile=null;
     const url=new URL(window.location.href); url.searchParams.set('type',type); window.history.replaceState({},'',url.toString());
   }
   document.querySelectorAll('.sc-type-btn').forEach(b => b.addEventListener('click', () => setActiveType(b.dataset.type)));
 
   scanInput.addEventListener('input', () => { const l=scanInput.value.length; charCount.textContent=`${l} / 5000`; if(scanError.classList.contains('is-visible'))clearError(); });
-  clearBtn.addEventListener('click', () => { scanInput.value=''; charCount.textContent='0 / 5000'; verdictPanel.classList.remove('is-visible'); clearError(); scanInput.focus(); });
+  clearBtn.addEventListener('click', () => { scanInput.value=''; charCount.textContent='0 / 5000'; verdictPanel.classList.remove('is-visible'); clearError(); selectedScreenshotFile=null; if(activeType==='screenshot') scanInput.placeholder=TYPES.screenshot.placeholder; scanInput.focus(); });
 
   if (screenshotDrop && screenshotFile) {
     screenshotDrop.addEventListener('dragover', e => { e.preventDefault(); screenshotDrop.classList.add('is-drag'); });
@@ -47,8 +47,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   function handleFile(file) {
     if (file.size > 5*1024*1024) { showError('File too large — max 5MB.'); return; }
-    scanInput.value = `[Screenshot uploaded: ${file.name}]\nPlease describe what the screenshot shows for scanning.`;
-    scanInput.dispatchEvent(new Event('input'));
+    const okTypes = ['image/png','image/jpeg','image/jpg','image/webp'];
+    if (!okTypes.includes(file.type)) { showError('Unsupported image type — use PNG, JPG, or WEBP.'); return; }
+    selectedScreenshotFile = file;
+    clearError();
+    scanInput.value = '';
+    scanInput.placeholder = `Selected: ${file.name} — click "Scan" to read and check it, or paste text instead.`;
+    charCount.textContent = '0 / 5000';
   }
 
   function showError(msg) { scanError.textContent=msg; scanError.classList.add('is-visible'); }
@@ -57,9 +62,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
   scanForm.addEventListener('submit', async e => {
     e.preventDefault(); clearError();
+
+    // Screenshot mode with a real file selected: upload it for OCR instead
+    // of scanning whatever text happens to be in the textarea.
+    if (activeType === 'screenshot' && selectedScreenshotFile) {
+      setLoading(true); verdictPanel.classList.remove('is-visible');
+      try {
+        const fd = new FormData();
+        fd.append('file', selectedScreenshotFile);
+        const res = await fetch('/api/scan/screenshot', { method:'POST', credentials:'same-origin', headers:{'X-CSRFToken':csrfToken}, body: fd });
+        const data = await res.json();
+        if (!res.ok) {
+          if (data.upgrade_required && window.VeridictAd) { window.VeridictAd.show(reward => { loadStats(); showError('You earned '+reward.bonus_granted+' bonus scans! Try again.'); }); }
+          else { showError(data.message || 'Could not read that image.'); }
+          return;
+        }
+        lastScannedText = data.extracted_text || '';
+        lastResult = data; displayVerdict(data, true); await Promise.all([loadStats(), loadHistory()]);
+        selectedScreenshotFile = null;
+      } catch { showError('Connection error. Please try again.'); }
+      finally { setLoading(false); }
+      return;
+    }
+
     const content=scanInput.value.trim();
-    if (!content) { showError('Paste something to scan first.'); scanInput.focus(); return; }
+    if (!content) { showError('Paste something to scan first, or upload a screenshot.'); scanInput.focus(); return; }
     setLoading(true); verdictPanel.classList.remove('is-visible');
+    lastScannedText = content;
     try {
       const res=await fetch('/api/scan',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json','X-CSRFToken':csrfToken},body:JSON.stringify({content,type:activeType})});
       const data=await res.json();
@@ -96,6 +125,41 @@ document.addEventListener('DOMContentLoaded', () => {
     verdictPanel.appendChild(box);
   }
 
+  function renderTypeSignals(data) {
+    let box = document.getElementById('typeSignalsBox');
+    if (box) box.remove();
+    const rows = [];
+
+    if (data.url_details && data.url_details.host) {
+      const d = data.url_details;
+      rows.push(`Domain: <strong>${esc(d.host)}</strong>`);
+      if (d.brand_match) rows.push(`⚠️ Looks similar to <strong>${esc(d.brand_match)}</strong> — possible lookalike domain`);
+      if (d.shortener) rows.push(`🔗 Shortened link — real destination is hidden`);
+      if (d.ip_based) rows.push(`⚠️ IP address used instead of a domain name`);
+      if (d.tld) rows.push(`Uses a free/high-risk domain ending (${esc(d.tld)})`);
+    }
+    if (data.network) rows.push(`📶 Number appears to be on the <strong>${esc(data.network)}</strong> network`);
+    if (data.community_reports && data.community_reports.length) {
+      rows.push(`🚩 Reported ${data.community_reports.length}x by the Veridict community — <a href="/community" style="color:var(--v-purple-lt);font-weight:600">view reports</a>`);
+    }
+    if (!rows.length) return;
+
+    box = document.createElement('div');
+    box.id = 'typeSignalsBox';
+    box.style.cssText = 'padding:14px 22px;border-top:1px solid var(--v-border)';
+    const label = document.createElement('div');
+    label.style.cssText = 'font-size:.7rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--v-muted);margin-bottom:10px';
+    label.textContent = 'Scanner findings';
+    box.appendChild(label);
+    rows.forEach(r => {
+      const row = document.createElement('div');
+      row.style.cssText = 'font-size:.82rem;color:var(--v-muted);padding-left:20px;position:relative;margin-bottom:8px;line-height:1.5';
+      row.innerHTML = `<span style="position:absolute;left:0">•</span>${r}`;
+      box.appendChild(row);
+    });
+    verdictPanel.appendChild(box);
+  }
+
   function renderRecommendedActions(actions) {
     let box = document.getElementById('recommendedActionsBox');
     if (box) box.remove();
@@ -119,9 +183,43 @@ document.addEventListener('DOMContentLoaded', () => {
     verdictPanel.appendChild(box);
   }
 
+  function riskLevelFromScore(score) {
+    if (score >= 80) return 'Critical';
+    if (score >= 55) return 'High';
+    if (score >= 25) return 'Medium';
+    return 'Low';
+  }
+
+  function renderHighlightBox(sourceText, highlights) {
+    if (!sourceText || !highlights || !highlights.length) { highlightBox.style.display='none'; highlightBox.innerHTML=''; return; }
+    let html = esc(sourceText);
+    // Longest snippets first so shorter overlapping matches don't fragment a longer one.
+    const sorted = [...highlights].sort((a,b) => b.length - a.length);
+    sorted.forEach(snippet => {
+      if (!snippet) return;
+      const escSnippet = esc(snippet);
+      if (!escSnippet.trim()) return;
+      const pattern = escSnippet.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const re = new RegExp(`(${pattern})`, 'gi');
+      html = html.replace(re, (m, g1, offset, str) => {
+        // Skip if already inside a <mark> tag from a previous pass.
+        const before = str.slice(0, offset);
+        const openCount = (before.match(/<mark>/g)||[]).length;
+        const closeCount = (before.match(/<\/mark>/g)||[]).length;
+        if (openCount > closeCount) return m;
+        return `<mark>${m}</mark>`;
+      });
+    });
+    highlightBox.className = 'sc-highlight-box';
+    highlightBox.style.display = 'block';
+    highlightBox.innerHTML = `<div class="sc-highlight-box__label">Flagged in your text</div><div class="sc-highlight-box__text">${html}</div>`;
+  }
+
   function displayVerdict(data, scroll) {
     const label=data.verdict.charAt(0).toUpperCase()+data.verdict.slice(1);
     verdictBadge.textContent=label; verdictBadge.className=`sc-verdict-badge verdict--${data.verdict}`;
+    const riskLevel = data.risk_level || riskLevelFromScore(data.score);
+    riskLevelBadge.textContent = riskLevel; riskLevelBadge.className = `sc-risk-badge risk--${riskLevel.toLowerCase()}`;
     verdictScore.textContent=`Risk score: ${data.score}/100`; verdictTime.textContent=data.scanned_at?fmt(data.scanned_at):'';
     flagList.innerHTML=''; flagList.classList.toggle('sc-flag-list--clean', !data.flags?.length);
     (data.flags?.length?data.flags:['No specific red flags detected.']).forEach(f => { const li=document.createElement('li'); li.textContent=f; flagList.appendChild(li); });
@@ -129,11 +227,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (data.explanation_truncated) {
       verdictExp.innerHTML = data.explanation.replace('Upgrade to Premium', '<a href="/plan" style="color:var(--v-purple-lt);font-weight:600">Upgrade to Premium</a>');
     }
+    // Highlight matched snippets against the full text on a fresh scan,
+    // or against the stored preview when replaying a history entry.
+    const sourceForHighlight = scroll ? lastScannedText : (data.preview || '');
+    renderHighlightBox(sourceForHighlight, data.highlights);
     renderRecommendedActions(data.recommended_actions);
+    renderTypeSignals(data);
     renderDeepAnalysis(data.deep_analysis);
-    if (data.explanation_truncated) {
-      verdictExp.innerHTML = data.explanation.replace('Upgrade to Premium', '<a href="/plan" style="color:var(--v-purple-lt);font-weight:600">Upgrade to Premium</a>');
-    }
     verdictPanel.classList.add('is-visible');
     if (scroll) verdictPanel.scrollIntoView({behavior:'smooth',block:'nearest'});
   }

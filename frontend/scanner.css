@@ -30,6 +30,15 @@
 .sc-verdict-badge.verdict--safe{background:rgba(34,197,94,.16);color:var(--v-safe);border:1px solid rgba(34,197,94,.32)}
 .sc-verdict-badge.verdict--suspicious{background:rgba(245,158,11,.14);color:var(--v-warn);border:1px solid rgba(245,158,11,.3)}
 .sc-verdict-badge.verdict--scam{background:rgba(239,68,68,.14);color:var(--v-danger);border:1px solid rgba(239,68,68,.3)}
+.sc-risk-badge{font-family:var(--v-font-d);font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:5px 12px;border-radius:999px}
+.sc-risk-badge.risk--low{background:rgba(34,197,94,.12);color:var(--v-safe);border:1px solid rgba(34,197,94,.28)}
+.sc-risk-badge.risk--medium{background:rgba(201,147,46,.14);color:var(--v-warn);border:1px solid rgba(201,147,46,.3)}
+.sc-risk-badge.risk--high{background:rgba(239,68,68,.14);color:var(--v-danger);border:1px solid rgba(239,68,68,.32)}
+.sc-risk-badge.risk--critical{background:#7f1d1d;color:#fff;border:1px solid #b91c1c;box-shadow:0 0 0 1px rgba(185,28,28,.4)}
+.sc-highlight-box{padding:16px 22px;border-top:1px solid var(--v-border);background:rgba(255,255,255,.015)}
+.sc-highlight-box__label{font-size:.7rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--v-muted);margin-bottom:10px}
+.sc-highlight-box__text{font-size:.85rem;line-height:1.7;color:var(--v-muted);white-space:pre-wrap;word-break:break-word}
+.sc-highlight-box__text mark{background:rgba(239,68,68,.22);color:var(--v-text);padding:1px 3px;border-radius:3px;font-weight:600;box-decoration-break:clone}
 .sc-result__meta{flex:1}
 .sc-result__score{font-family:var(--v-font-d);font-weight:600;font-size:.92rem}
 .sc-result__time{font-size:.74rem;color:var(--v-faint)}
