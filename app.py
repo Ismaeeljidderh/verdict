@@ -34,9 +34,14 @@ def create_app():
     # CONFIG
     # ---------------------------------------------------------
     app.config["SECRET_KEY"]                = os.environ.get("SECRET_KEY", "dev-secret-veridict-2024")
-    app.config["SQLALCHEMY_DATABASE_URI"]   = os.environ.get(
-        "DATABASE_URL", f"sqlite:///{os.path.join(BASE_DIR, 'veridict.db')}"
-    )
+
+    # Render's free Postgres gives connection strings starting with
+    # "postgres://", but SQLAlchemy 1.4+ requires "postgresql://" —
+    # this rewrites it automatically so the same DATABASE_URL just works.
+    _db_url = os.environ.get("DATABASE_URL", f"sqlite:///{os.path.join(BASE_DIR, 'veridict.db')}")
+    if _db_url.startswith("postgres://"):
+        _db_url = _db_url.replace("postgres://", "postgresql://", 1)
+    app.config["SQLALCHEMY_DATABASE_URI"]   = _db_url
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     # Session cookies
